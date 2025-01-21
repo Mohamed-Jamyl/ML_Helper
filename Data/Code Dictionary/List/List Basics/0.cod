@@ -1,0 +1,18 @@
+list remove
+y.remove("b")
+
+------------------------------------------------
+
+list sort
+sorted(y)
+y.sort()
+sorted(y,reverse = True)
+
+------------------------------------------------
+
+list sort lambda
+sorted(y, key=lambda e: e[1])
+sorted(y,reverse = True, key=lambda e: e[3])
+
+student_tuples = [('john', 'A', 15),('jane', 'B', 12),('dave', 'B', 10)]
+a = sorted(student_tuples, key=lambda student: student[2])

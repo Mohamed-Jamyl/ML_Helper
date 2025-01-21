@@ -1,0 +1,6 @@
+def CountNulls() : 
+    global data
+    for col in data.columns : 
+        if not data[col].isna().sum() == 0 : 
+            print(f'Column {col} has number of nulls {data[col].isna().sum()}')
+    print('Counting Nulls Ends .')

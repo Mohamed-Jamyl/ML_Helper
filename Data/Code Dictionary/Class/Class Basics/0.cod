@@ -1,0 +1,42 @@
+class car : 
+    length = 15
+    width = 8
+    height = 6
+    color = 'white'
+    volume = length * width * height
+    
+print(car.color)
+------------------------------------------
+class car : 
+    length = 15
+    width = 8
+    height = 6
+    color = 'white'
+    volume = length * width * height
+    
+print(car.color)
+------------------------------------------
+class car : 
+    length = 15
+    width = 8
+    height = 6
+    color = 'white'
+    volume = length * width * height
+
+volvo = car
+
+print(volvo.height)
+------------------------------------------
+from myclasses import  car 
+------------------------------------------
+from myclasses import  * 
+------------------------------------------
+class d :  
+    def square(n) : 
+        print (n**2)
+    
+    def summ(a,b,c,d,e,f) : 
+        return ((a+b-c+e)*(d+f))
+a = d    
+a.square(3)
+print (a.summ(1,2,3,4,5,7))

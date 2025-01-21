@@ -1,0 +1,36 @@
+def Pie(feature,Limit=10) : 
+    global data
+    fig, ax = plt.subplots(figsize=(10,6))
+    plt.pie(Data[feature].value_counts()[:Limit],labels=list(Data[feature].value_counts()[:Limit].index),autopct ='%1.2f%%' , labeldistance = 1.1,explode = [0.05 for i in range(len(Data[feature].value_counts()[:Limit]))] )
+    plt.show()
+
+
+#########################################
+
+
+def SelectedFeaturePie(feature,Limit=10) : 
+    Feature = '#########'
+    Values = ['a','b','c']
+    global data
+    fig, ax = plt.subplots(figsize=(15,4))
+    
+    plt.subplot(1,3,1)
+    plt.title(Values[0])
+    Data = data[data[Feature]==Values[0]]
+    plt.pie(Data[feature].value_counts()[:Limit],labels=list(
+        Data[feature].value_counts()[:Limit].index),
+        autopct ='%1.2f%%' , labeldistance = 1.1,
+            explode = [0.05 for i in range(len(Data[feature].value_counts()[:Limit]))] )
+  
+    plt.subplot(1,3,2)
+    plt.title(Values[1])
+    Data = data[data[Feature]==Values[1]]
+    plt.pie(Data[feature].value_counts()[:Limit],labels=list(Data[feature].value_counts()[:Limit].index),
+        autopct ='%1.2f%%' , labeldistance = 1.1,explode = [0.05 for i in range(len(Data[feature].value_counts()[:Limit]))] )
+
+    plt.subplot(1,3,3)
+    plt.title(Values[2])
+    Data = data[data[Feature]==Values[2]]
+    plt.pie(Data[feature].value_counts()[:Limit],labels=list(Data[feature].value_counts()[:Limit].index),
+        autopct ='%1.2f%%' , labeldistance = 1.1,explode = [0.05 for i in range(len(Data[feature].value_counts()[:Limit]))] )
+    plt.show()     

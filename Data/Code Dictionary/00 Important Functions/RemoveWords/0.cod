@@ -1,0 +1,12 @@
+def RemoveWords(data , feature , new_feature, words_list ) : 
+    new_column = []
+    for i in range(data.shape[0]) : 
+        this_phrase = data[feature][i]
+        new_phrase = []
+        for word in this_phrase.split() : 
+            if not word.lower() in words_list : 
+                new_phrase.append(word)
+        new_column.append(' '.join(new_phrase))
+    
+    data.insert(data.shape[1],new_feature,new_column)
+    

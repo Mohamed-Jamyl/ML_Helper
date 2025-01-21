@@ -1,0 +1,11 @@
+def Level(x,Values,Names) : #[18,22,40,81] , [Teen,YoungMan,Adult,Old]
+    x = float(x)
+    for a,b in zip(Values,Names) : 
+        if x < a : return b
+data['AgeLevel']  = data['Age'].apply(lambda x : Level(x,[18,22,40,81] , ['Teen','YoungMan','Adult','Old']))
+data['IncomeLevel']  = data['Income'].apply(lambda x : Level(x,[300,1000,100001], ['Poor Income','Medium Income','Good Income']))
+
+
+data['AgeLevel'].value_counts()  
+
+

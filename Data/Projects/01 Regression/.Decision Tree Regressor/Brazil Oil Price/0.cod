@@ -1,0 +1,299 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+sns.set(style="whitegrid")
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+
+
+
+col_names = ['Index','Initial Date','Final Date','Region','State','Product','Number of searches','Unit of Measurment',
+           'Mean Price','Default Price','Minimum Price','Maximum Price','Mean Margin','Price Standar Deviation','Mean Price Distribution',
+           'Default Price Distribution','Minimum Price Distribution','Maximum Price Distribution','Distribution Standard Deviation',
+           'M Factor' ,'Year']
+
+data = pd.read_excel('2004-2019.xls' , names = col_names)  
+
+data.head()
+
+
+data.shape
+
+
+
+data.drop(['Index'],axis=1, inplace=True)
+
+
+data.head()
+
+
+data.describe()
+
+data.info()
+
+
+data['Mean Margin']
+
+
+n = 0
+for i in range(data.shape[0]) : 
+    if str(data['Mean Margin'][i]) == '-' : 
+        n+=1
+
+print('There is {} null value here'.format(n))
+    
+summ = 0
+n = 0
+
+for i in range(data.shape[0]) : 
+    if not str(data['Mean Margin'][i]) == '-' : 
+        summ += float(data['Mean Margin'][i])
+        n+=1
+
+the_mean = summ/ n
+
+print('the mean is {}'.format(the_mean))
+
+for i in range(data.shape[0]) : 
+    if str(data['Mean Margin'][i]) == '-' : 
+      data['Mean Margin'][i] = the_mean
+        
+
+n = 0
+for i in range(data.shape[0]) : 
+    if str(data['Mean Margin'][i]) == '-' : 
+        n+=1
+
+print('There is {} null value here'.format(n))
+
+
+
+data.info()
+
+
+n = 0
+for i in range(data.shape[0]) : 
+    if float(data['Mean Margin'][i]) == 0 : 
+        n+=1
+
+print('There is {} cell with zero value'.format(n))
+
+
+a = b = c= d = e  = 0
+for i in range(data.shape[0]) : 
+    if str(data['Mean Price Distribution'][i]) == '-' : 
+        a+=1
+    if str(data['Default Price Distribution'][i]) == '-' : 
+        b+=1
+    if str(data['Minimum Price Distribution'][i]) == '-' : 
+        c+=1
+    if str(data['Maximum Price Distribution'][i]) == '-' : 
+        d+=1
+    if str(data['Distribution Standard Deviation'][i]) == '-' :  
+        e+=1
+
+print('There is {} null value here'.format(a))
+print('There is {} null value here'.format(b))
+print('There is {} null value here'.format(c))                
+print('There is {} null value here'.format(d))
+print('There is {} null value here'.format(e))                
+    
+
+a_summ = b_summ = c_summ = d_summ = e_summ = 0
+n = 1471
+
+for i in range(data.shape[0]) : 
+    if not str(data['Mean Price Distribution'][i]) == '-' : 
+        a_summ += float(data['Mean Price Distribution'][i])
+        
+    if not str(data['Default Price Distribution'][i]) == '-' : 
+        b_summ += float(data['Default Price Distribution'][i])
+
+    if not str(data['Minimum Price Distribution'][i]) == '-' : 
+        c_summ += float(data['Minimum Price Distribution'][i])
+        
+    if not str(data['Maximum Price Distribution'][i]) == '-' : 
+        d_summ += float(data['Maximum Price Distribution'][i])
+        
+    if not str(data['Distribution Standard Deviation'][i]) == '-' : 
+        e_summ += float(data['Distribution Standard Deviation'][i])
+        
+
+      
+        
+a_mean = a_summ/ n
+b_mean = b_summ/ n
+c_mean = c_summ/ n
+d_mean = d_summ/ n
+e_mean = e_summ/ n
+
+for i in range(data.shape[0]) : 
+    if str(data['Mean Price Distribution'][i]) == '-' : 
+        data['Mean Price Distribution'][i] = a_mean
+
+    if str(data['Default Price Distribution'][i]) == '-' : 
+        data['Default Price Distribution'][i] = b_mean
+        
+    if str(data['Minimum Price Distribution'][i]) == '-' : 
+        data['Minimum Price Distribution'][i] = c_mean
+        
+    if str(data['Maximum Price Distribution'][i]) == '-' : 
+        data['Maximum Price Distribution'][i] = d_mean
+    
+    if str(data['Distribution Standard Deviation'][i]) == '-' : 
+        data['Distribution Standard Deviation'][i] = e_mean
+        
+
+data['Region'].unique()
+
+Region_dict = {'CENTRO OESTE': 0,'NORDESTE':1, 'NORTE':2, 'SUDESTE':3, 'SUL':4}
+data['Region Code'] = data['Region'].map(Region_dict)
+
+data.drop(['Region'],axis=1, inplace=True)
+
+
+data.head()
+
+
+data['State'].unique()
+
+        
+State_dict = {'DISTRITO FEDERAL':0, 'GOIAS':1, 'MATO GROSSO':2, 'MATO GROSSO DO SUL':3,
+       'ALAGOAS':4, 'BAHIA':5, 'CEARA':6, 'MARANHAO':7, 'PARAIBA':8, 'PERNAMBUCO':9,
+       'PIAUI':10, 'RIO GRANDE DO NORTE':11, 'SERGIPE':12, 'ACRE':13, 'AMAPA':14,
+       'AMAZONAS':15, 'PARA':16, 'RONDONIA':17, 'RORAIMA':18, 'TOCANTINS':19,
+       'ESPIRITO SANTO':20, 'MINAS GERAIS':21, 'RIO DE JANEIRO':22, 'SAO PAULO':23,
+       'PARANA':24, 'RIO GRANDE DO SUL':25, 'SANTA CATARINA':26}
+data['State Code'] = data['State'].map(State_dict)
+
+data.drop(['State'],axis=1, inplace=True)
+
+data.head()
+
+data['Product'].unique()
+
+
+Product_dict = {'ETANOL HIDRATADO':0, 'GASOLINA COMUM':1, 'GLP':2, 'GNV':3, 'Ã“LEO DIESEL':4,
+       'Ã“LEO DIESEL S10':5}
+
+data['Product Code'] = data['Product'].map(Product_dict)
+
+data.drop(['Product'],axis=1, inplace=True)
+
+data.head()
+
+data['Unit of Measurment'].unique()
+
+
+Unit_dict = {'R$/l':0, 'R$/13Kg':1, 'R$/m3':2}
+
+data['Unit Code'] = data['Unit of Measurment'].map(Unit_dict)
+
+data.drop(['Unit of Measurment'],axis=1, inplace=True)
+
+data.head()
+
+
+mismatch=0
+for i in range(data.shape[0])  : 
+    if not (int(data['Initial Date'][i].year)  == int(data['Final Date'][i].year)) :
+        mismatch +=1
+        
+print( 'Year mismatch amount is {}'.format(mismatch))
+
+
+Years = []
+Months = []
+for i in range(data.shape[0])  : 
+    Years.append(str(data['Final Date'][i])[:4])
+    Months.append(str(data['Final Date'][i])[5:7])       
+
+data['Final Year'] = Years
+data['Final Months'] = Months
+
+data.drop(['Initial Date','Final Date','Year'],axis=1, inplace=True)
+
+
+data.head()
+
+sns.countplot(x="Region Code", data=data,facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3))
+
+
+sns.countplot(x="State Code", data=data,facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3))
+
+
+
+sns.countplot(x="Product Code", data=data,facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3))
+
+
+sns.countplot(x="Final Year", data=data,facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3))
+
+
+X = data.drop(['Mean Price'], axis=1, inplace=False)
+print('X shape is ' , X.shape)
+X.head()
+
+y = data['Mean Price']
+
+print('y shape is ' , y.shape)
+y.head()
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=44, shuffle =True)
+
+
+print('X_train shape is ' , X_train.shape)
+print('X_test shape is ' , X_test.shape)
+print('y_train shape is ' , y_train.shape)
+print('y_test shape is ' , y_test.shape)
+
+
+LinearRegressionModel = LinearRegression(fit_intercept=True, normalize=True,copy_X=True,n_jobs=-1)
+LinearRegressionModel.fit(X_train, y_train)
+
+#Calculating Details
+print('Linear Regression Train Score is : ' , LinearRegressionModel.score(X_train, y_train))
+print('Linear Regression Test Score is : ' , LinearRegressionModel.score(X_test, y_test))
+
+
+y_pred = LinearRegressionModel.predict(X_test)
+print('Predicted Value for Linear Regression is : ' , y_pred[:10])
+
+
+'''
+sklearn.svm.SVR(kernel=’rbf’, degree=3, gamma=’auto_deprecated’, coef0=0.0, tol=0.001,
+                C=1.0, epsilon=0.1, shrinking=True, cache_size=200, verbose=False,max_iter=-1)
+'''
+
+SVRModel = SVR(C = 1.0 ,epsilon=1,kernel = 'rbf') # it also can be : linear, poly, rbf, sigmoid, precomputed
+SVRModel.fit(X_train, y_train)
+
+
+print('SVRModel Train Score is : ' , SVRModel.score(X_train, y_train))
+print('SVRModel Test Score is : ' , SVRModel.score(X_test, y_test))
+
+#Calculating Prediction
+y_pred = SVRModel.predict(X_test)
+print('Predicted Value for SVRModel is : ' , y_pred[:10])
+
+
+'''
+sklearn.tree.DecisionTreeRegressor(criterion='mse’, splitter=’best’, max_depth=None,min_samples_split=2,
+                                   min_samples_leaf=1,min_weight_fraction_leaf=0.0, max_features=None,
+                                   random_state=None, max_leaf_nodes=None,min_impurity_decrease=0.0,
+                                   min_impurity_split=None, presort=False)
+'''
+
+DecisionTreeRegressorModel = DecisionTreeRegressor( max_depth=3,random_state=33)
+DecisionTreeRegressorModel.fit(X_train, y_train)
+
+
+print('DecisionTreeRegressor Train Score is : ' , DecisionTreeRegressorModel.score(X_train, y_train))
+print('DecisionTreeRegressor Test Score is : ' , DecisionTreeRegressorModel.score(X_test, y_test))
+
+y_pred = DecisionTreeRegressorModel.predict(X_test)
+print('Predicted Value for DecisionTreeRegressorModel is : ' , y_pred[:10])

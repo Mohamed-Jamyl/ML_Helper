@@ -1,0 +1,7 @@
+def DropNulls(percentage = 0.3) : 
+    global data
+    for col in data.columns : 
+        ratio =  data[col].isna().sum()/data.shape[0]
+        if ratio >= percentage : 
+            data.drop([col],axis=1, inplace=True)
+            print(f'Column {col} has been dropped since nulls percentage is {round(ratio *100)} %')

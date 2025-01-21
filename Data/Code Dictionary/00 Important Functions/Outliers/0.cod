@@ -1,0 +1,95 @@
+# 1 - Manual Method
+
+data.describe()
+data[data['Age']<18].shape
+data[data['Age']<18]
+data[data['Income']>10000].shape
+data[data['Income']>10000]
+
+
+# 2 - Interquartile range(IQR)
+
+data.boxplot('Age')
+
+for x in ['Age']:
+    q75,q25 = np.percentile(data.loc[:,x],[75,25])
+    intr_qr = q75-q25
+
+ 
+    max = q75+(1.5*intr_qr)
+    min = q25-(1.5*intr_qr)
+ 
+    data.loc[data[x] < min,x] = np.nan
+    data.loc[data[x] > max,x] = np.nan
+
+data = data.dropna(axis = 0)
+
+data.reset_index(inplace=True)
+data.drop(['index'],axis = 1,inplace=True)
+
+
+# 3 - Z Score
+
+data.boxplot('Debt')
+data['Debt'].mean(),data['Debt'].std()
+
+threshold = 3
+outlier = []
+for i in data['Debt']:
+    z = (i-data['Debt'].mean())/data['Debt'].std()
+    print(z)
+    if abs(z) > threshold:
+        outlier.append(i)
+print('outlier in dataset is', outlier)
+
+OutlierIndices = [i for i,j in enumerate(data['Debt'].tolist()) if j in outlier]
+OutlierIndices
+
+
+
+data.loc[OutlierIndices,:]
+
+
+
+data.drop(OutlierIndices,axis=0,inplace=True)
+data.reset_index(inplace=True)
+data.drop(['index'],axis = 1,inplace=True)
+data
+
+
+
+
+# 4- Gaussian Distribution
+
+
+def estimate_gaussian(dataset):
+
+    mu = np.mean(dataset)
+    sigma = np.std(dataset)
+    limit = sigma * 1.5
+
+    min_threshold = mu - limit
+    max_threshold = mu + limit
+
+    return mu, sigma, min_threshold, max_threshold
+
+mu, sigma, min_threshold, max_threshold = estimate_gaussian(data['YearsEmployed'].values)
+mu, sigma, min_threshold, max_threshold 
+
+data[data['YearsEmployed']<min_threshold]
+
+
+
+data[data['YearsEmployed']>max_threshold]
+
+
+
+data[data['YearsEmployed']>max_threshold*2]
+
+
+
+data.drop(data[data['YearsEmployed']>max_threshold*2].index,axis=0,inplace=True)
+data.reset_index(inplace=True)
+data.drop(['index'],axis = 1,inplace=True)
+data
+

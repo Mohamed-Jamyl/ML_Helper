@@ -1,0 +1,138 @@
+
+# # Calculate Authenticity
+
+# In[185]:
+
+
+SmallData.columns
+
+
+# In[186]:
+
+
+SmallData.head()
+
+
+# In[233]:
+
+
+SmallData.reset_index(inplace=True)
+
+
+# In[248]:
+
+
+SmallData['Label'] = SmallData['is_fraud'].apply(lambda x : -1 if x ==1 else 1)
+
+
+# In[234]:
+
+
+AuthFeatures=  ['lat','long','city_pop','merch_lat','merch_long','Year','Month','Day','Hour','Minute','Second','Age','Encoded merchant','Encoded category','Encoded gender','Encoded address','Encoded city','Encoded state','Encoded zip','Encoded job']
+AuthData = SmallData[AuthFeatures]
+AuthData.head()
+
+
+# In[249]:
+
+
+AuthOutput = SmallData['Label']
+AuthOutput
+
+
+# In[236]:
+
+
+AuthData.shape
+
+
+# In[237]:
+
+
+for i in AuthData.columns : 
+  ThisMax = float(max(AuthData[i].tolist()))
+  AuthData[f'N_{i}'] = AuthData[i].apply(lambda x : float(float(x)/ThisMax) )
+AuthData
+
+
+# In[238]:
+
+
+AuthData.drop([i for i in AuthFeatures],axis = 1,inplace=True)
+AuthData
+
+
+# In[250]:
+
+
+AuthOutput.value_counts()
+
+
+# In[256]:
+
+
+UserAuthticity = True
+if UserAuthticity : 
+  AuthData['Max Result'] = 0.0
+  AuthData['Min Result'] = 0.0
+  for i in range(AuthData.shape[0]) : 
+    AuthData.loc[i,'Max Result'] = sum([j*k for j,k in zip([AuthData.loc[i,c] for c in AuthData.columns],[1 for l in range(len(AuthData.columns))])])/20
+    AuthData.loc[i,'Min Result'] = sum([j*k for j,k in zip([AuthData.loc[i,c] for c in AuthData.columns],[-1 for l in range(len(AuthData.columns))])])/20
+  print(AuthData['Max Result'].max())
+  print(AuthData['Min Result'].min())
+
+
+# In[257]:
+
+
+UserAuthticity = True
+if UserAuthticity : 
+  NoOfIterations = 100
+  AllFactors = {}
+  WrongFactor = 3
+  MaxScore,MinScore = -10000,10000
+  MaxDiff,MinDiff = -10000,10000
+  Values = [-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
+  for i in tqdm(range(NoOfIterations)) :
+    Factors = [np.random.choice(Values) for j in range(len(AuthData.columns))]
+
+    Diff = 0
+    for k in range(AuthData.shape[0]) : 
+      TheseValues = [AuthData[c][k] for c in AuthData.columns]
+      UserScore = sum([j*k for j,k in zip(TheseValues,Factors)])/10
+      if UserScore > MaxScore : MaxScore = UserScore 
+      if UserScore < MinScore : MinScore = UserScore 
+      ThisLabel = int(AuthOutput[k])
+      if UserScore > 0 :   
+        if ThisLabel == 1 : 
+          Diff +=  abs(UserScore-ThisLabel)
+        else : 
+          Diff +=  WrongFactor*abs(UserScore-ThisLabel)
+      else : 
+        if ThisLabel == 1 : 
+          Diff +=  WrongFactor*abs(UserScore-ThisLabel)
+        else : 
+          Diff +=  abs(UserScore-ThisLabel)
+
+    if Diff > MaxDiff : MaxDiff = Diff 
+    if Diff < MinDiff : MinDiff = Diff 
+    AllFactors[i] = [Diff/1000,Factors]
+  print(MaxScore,MinScore)
+  print(MaxDiff,MinDiff)
+
+  MinSelectedDiff = 1000
+  for i,j in AllFactors.items() : 
+    if AllFactors[i][0] < MinSelectedDiff : 
+      MinSelectedDiff = AllFactors[i][0]
+      MinSelectedIndex = i
+    
+  print(MinSelectedDiff,MinSelectedIndex)    
+  BestWeights = AllFactors[MinSelectedIndex][1]
+  print(BestWeights)
+
+
+# In[ ]:
+
+
+BestValues = [0.3,0.7,0.9,0.6,0.3,0.5,-0.1,0.4,0.7,0.1,0.3,0.0,0.9,0.9,0.3,-0.6,-0.1,1.0,-1.0,1.0,0.6,-0.5]
+

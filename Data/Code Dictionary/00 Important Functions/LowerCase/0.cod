@@ -1,0 +1,5 @@
+def LowerCase(feature , newfeature) : 
+    global data
+    def ApplyLower(text) : 
+        return text.lower()
+    data[newfeature] = data[feature].apply(ApplyLower)

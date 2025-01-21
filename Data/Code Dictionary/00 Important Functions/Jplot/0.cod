@@ -1,0 +1,4 @@
+def JPlot(feature_1,feature_2) :
+    global data
+    fig, ax = plt.subplots(figsize=(10,6))
+    sns.jointplot(feature_1,feature_2 ,data, kind='kde')

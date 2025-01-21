@@ -1,0 +1,11 @@
+class car() : 
+    color = 'blue'
+    
+volvo = car
+nissan = car
+
+volvo.color = 'white'
+nissan.color = 'green'
+
+print(volvo.color)
+print(nissan.color)

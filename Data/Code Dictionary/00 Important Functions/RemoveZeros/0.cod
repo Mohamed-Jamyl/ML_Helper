@@ -1,0 +1,3 @@
+def RemoveZero(feature , val = 0) :
+    global data
+    data = data[data[feature] != val]

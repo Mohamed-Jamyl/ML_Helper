@@ -1,0 +1,250 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
+
+
+
+# In[1]:
+
+
+import numpy as np
+import pandas as pd 
+from keras.preprocessing.image import ImageDataGenerator, load_img
+from tensorflow.keras.utils import to_categorical
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import random,os
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, Activation, BatchNormalization
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+
+
+# In[2]:
+
+
+FAST_RUN = False
+IMAGE_WIDTH=128
+IMAGE_HEIGHT=128
+IMAGE_SIZE=(IMAGE_WIDTH, IMAGE_HEIGHT)
+IMAGE_CHANNELS=3
+Path = "/content/drive/MyDrive/Data/Eman/Data"
+Classes = os.listdir(Path)
+ClassesDict = {i:j for i,j in zip(Classes,range(len(Classes)))}
+ClassesDict
+
+
+# In[3]:
+
+
+AllImages = {}
+ContinousImages,ContinousClasses = [],[]
+for Class in Classes : 
+  ThisPath = os.path.join(Path,Class)
+  Files = []
+  for i in os.listdir(ThisPath) : 
+    Files.append(os.path.join(ThisPath,i))
+    ContinousClasses.append(Class)
+  ContinousImages.extend(Files)  
+  AllImages[Class] = Files
+AllImages
+
+
+# In[4]:
+
+
+len(ContinousImages),len(ContinousClasses)
+
+
+# In[4]:
+
+
+
+
+
+# In[5]:
+
+
+data = pd.DataFrame({'Images': ContinousImages,'Classes' :ContinousClasses })
+data
+
+
+# In[6]:
+
+
+data['category']= data['Classes'].apply(lambda x : ClassesDict[x] )
+data
+
+
+# In[7]:
+
+
+data['Classes'].value_counts().plot.bar()
+
+
+# In[8]:
+
+
+image = load_img(random.choice(data['Images'].tolist()))
+plt.imshow(image)
+
+
+# In[9]:
+
+
+
+model = Sequential()
+model.add(Conv2D(32, (3, 3), activation='relu',
+                 input_shape=(IMAGE_WIDTH,IMAGE_HEIGHT, IMAGE_CHANNELS)))
+model.add(BatchNormalization())
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+
+model.add(Conv2D(64, (3, 3), activation='relu'))
+model.add(BatchNormalization())
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.25))
+
+# model.add(Conv2D(128, (3, 3), activation='relu'))
+# model.add(BatchNormalization())
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(Dropout(0.25))
+
+model.add(Flatten())
+model.add(Dense(512, activation='relu'))
+model.add(BatchNormalization())
+model.add(Dropout(0.5))
+model.add(Dense(len(Classes), activation='softmax')) 
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+
+model.summary()
+
+
+# In[10]:
+
+
+earlystop = EarlyStopping(patience=10)
+learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc', 
+                                            patience=2, 
+                                            verbose=1, 
+                                            factor=0.5, 
+                                            min_lr=0.00001)
+callbacks = [earlystop, learning_rate_reduction]
+
+
+# In[11]:
+
+
+TrainData,TestData = train_test_split(data, test_size=0.20, random_state=42)
+TrainData.reset_index(drop=True,inplace = True)
+TestData.reset_index(drop=True,inplace = True)
+
+
+# In[12]:
+
+
+TrainData['category'].value_counts().plot.bar()
+
+
+# In[13]:
+
+
+TestData['category'].value_counts().plot.bar()
+
+
+# In[14]:
+
+
+total_train = TrainData.shape[0]
+total_validate = TestData.shape[0]
+batch_size=100
+
+
+# In[15]:
+
+
+train_datagen = ImageDataGenerator(
+    # rotation_range=15,
+    rescale=1./255,
+    # shear_range=0.1,
+    # zoom_range=0.2,
+    # horizontal_flip=True,
+    # width_shift_range=0.1,
+    # height_shift_range=0.1
+)
+
+train_generator = train_datagen.flow_from_dataframe(
+    TrainData, 
+    Path, 
+    x_col='Images',
+    y_col='Classes',
+    target_size=IMAGE_SIZE,
+    class_mode='categorical',
+    batch_size=batch_size
+)
+
+
+# In[16]:
+
+
+validation_datagen = ImageDataGenerator(rescale=1./255)
+validation_generator = validation_datagen.flow_from_dataframe(
+    TestData, 
+    Path, 
+    x_col='Images',
+    y_col='Classes',
+    target_size=IMAGE_SIZE,
+    class_mode='categorical',
+    batch_size=batch_size
+)
+
+
+# In[17]:
+
+
+ExampleData = TrainData.sample(n=1).reset_index(drop=True)
+example_generator = train_datagen.flow_from_dataframe(
+    ExampleData, 
+    Path, 
+    x_col='Images',
+    y_col='Classes',
+    target_size=IMAGE_SIZE,
+    class_mode='categorical'
+)
+
+
+# In[18]:
+
+
+plt.figure(figsize=(12, 12))
+for i in range(0, 15):
+    plt.subplot(5, 3, i+1)
+    for X_batch, Y_batch in example_generator:
+        image = X_batch[0]
+        plt.imshow(image)
+        break
+plt.tight_layout()
+plt.show()
+
+
+# In[19]:
+
+
+epochs=3
+history = model.fit_generator(
+    train_generator, 
+    epochs=epochs,
+    validation_data=validation_generator,
+    validation_steps=total_validate//batch_size,
+    steps_per_epoch=total_train//batch_size,
+    callbacks=callbacks
+)
+
+
+# In[ ]:
+
+
+
+

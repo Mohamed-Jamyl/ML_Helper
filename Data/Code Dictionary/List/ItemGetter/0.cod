@@ -1,0 +1,10 @@
+itemgetter
+from operator import itemgetter
+student_tuples = [('john', 'A', 15),('jane', 'B', 12),('dave', 'B', 10),]
+------------------------------------------
+print(sorted(student_tuples, key=itemgetter(2))) #sort by age
+------------------------------------------
+print(sorted(student_tuples, key=itemgetter(1,2))) #sort  by class then age
+------------------------------------------
+messages = ['critical!!!', 'hurry!', 'bla bla', 'alabama']
+print sorted(messages, key=methodcaller( 'count', 'a')) #sort by count of letter a

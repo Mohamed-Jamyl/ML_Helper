@@ -1,0 +1,10 @@
+def ShowDetails() : 
+    global data
+    for col in data.columns : 
+        print(f'for feature : {col}')
+        print(f'Number of Nulls is   {data[col].isna().sum()}')
+        print(f'Number of Unique values is   {len(data[col].unique())}')
+        print(f'random Value {data[col][np.random.randint(data.shape[0])]}')
+        print(f'random Value {data[col][np.random.randint(data.shape[0])]}')
+        print(f'random Value {data[col][np.random.randint(data.shape[0])]}')
+        print('--------------------------')

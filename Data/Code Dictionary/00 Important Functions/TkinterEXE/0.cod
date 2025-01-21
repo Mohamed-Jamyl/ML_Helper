@@ -1,0 +1,98 @@
+'''
+UI to PY : 
+- design at QT designer and save it as ui
+- run : pyuic5 -x 0.ui -o 000.py
+
+--------------------------------------------------------
+
+PY to EXE : 
+- open anaconda shell
+- go to P position
+- pip install cx_freeze
+- rename file name in .py file
+- run : python QT.py build
+- run : python TK.py build
+
+
+
+'''
+
+#############################
+
+#QT.py
+
+FileName = "agri.py"
+#######################################################
+
+import sys
+from cx_Freeze import setup, Executable
+try:
+    from cx_Freeze.hooks import get_qt_plugins_paths
+except ImportError:
+    include_files = []
+else:
+    # Inclusion of extra plugins (new in cx_Freeze 6.8b2)
+    # cx_Freeze imports automatically the following plugins depending of the
+    # use of some modules:
+    # imageformats - QtGui
+    # platforms - QtGui
+    # mediaservice - QtMultimedia
+    # printsupport - QtPrintSupport
+    #
+    # So, "platforms" is used here for demonstration purposes.
+    include_files = get_qt_plugins_paths("PyQt5", "platforms")
+
+# base="Win32GUI" should be used only for Windows GUI app
+base = None
+if sys.platform == "win32":
+    base = "Win32GUI"
+
+build_exe_options = {
+    "excludes": ["tkinter"],
+    "include_files": include_files,
+}
+
+bdist_mac_options = {
+    "bundle_name": "Test",
+}
+
+bdist_dmg_options = {
+    "volume_label": "TEST",
+}
+
+executables = [Executable(FileName, base=base, target_name="test_pyqt5")]
+
+setup(
+    name="simple_PyQt5",
+    version="0.3",
+    description="Sample cx_Freeze PyQt5 script",
+    options={
+        "build_exe": build_exe_options,
+        "bdist_mac": bdist_mac_options,
+        "bdist_dmg": bdist_dmg_options,
+    },
+    executables=executables,
+)
+
+
+
+#############################
+
+#TK.py
+
+
+import sys,cx_Freeze,os,matplotlib,tkinter
+from cx_Freeze import setup, Executable
+
+base = None
+if sys.platform == "win32":
+    base = "Win32GUI"
+
+executables = [Executable("SimpleTkApp.py", base=base)]
+
+setup(
+    name="simple_Tkinter",
+    version="0.1",
+    description="Sample cx_Freeze Tkinter script",
+    executables=executables,
+)

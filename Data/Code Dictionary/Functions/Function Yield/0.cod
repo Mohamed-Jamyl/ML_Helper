@@ -1,0 +1,36 @@
+def yie():
+    for i in range(10):
+        yield i
+        
+for g in yie():
+       print(g)
+------------------------------------------
+def yie():
+    for i in range(10):
+        yield i
+           
+f = yie()
+print (next(f))
+print (next(f))
+print (next(f))
+------------------------------------------
+def fibon(n):
+    a = b = 1
+    result =[]
+    for i in range(n):
+        result.append (a)
+        a , b = b , a+b
+    return result
+
+print (fibon(20))
+------------------------------------------
+def fibon(n):
+    a = b = 1
+     
+    for i in range(n):
+        yield  a
+        a , b = b , a+b
+     
+for x in fibon(20):
+    print (x)
+

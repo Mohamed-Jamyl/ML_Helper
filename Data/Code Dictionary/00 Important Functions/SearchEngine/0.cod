@@ -1,0 +1,412 @@
+def AISearchEngine(text) : 
+    Alef_Lam = 0.9
+    Alef_Hamza = 0.7
+    Haa_Taa = 0.7
+    Plural_Number = 0.9
+    
+    def AIOneWordManiPulate(word): 
+        AllWords = {word:1}
+        for w in [i for i in AllWords.keys()] : 
+            if w[:2] != 'ال' :
+                AllWords['ال' + w] = Alef_Lam
+
+        A = []
+        for w in [i for i in AllWords.keys()] : 
+            if w[0] == 'ا' and  w[1] != 'ل' :
+                A.append('أ' + w[1:])
+            if w[0] == 'أ' and  w[1] != 'ل' :
+                A.append('ا' + w[1:])
+        for a in A : 
+            AllWords[a] = Alef_Hamza
+        
+
+        AllWords1 =  {}
+        A = []
+        for w in [i for i in AllWords.keys()] : 
+            if w[-1] == 'ه' : 
+                A.append(w[:-1] + 'ة')
+            elif w[-1] == 'ة' : 
+                A.append(w[:-1] + 'ه')
+            else : 
+                A.append(w + 'ة')
+                A.append(w + 'ه')
+
+        for a in A : 
+            AllWords1[a] = Haa_Taa
+        
+        
+        AllWords2 =  {}
+        if w[-1] != 'ه' and w[-1] != 'ة' :     
+            A = []
+            for w in [i for i in AllWords.keys()] : 
+                Plural = ['ون','ين','ات']
+
+                if not w[-2:] in Plural  : 
+                    A.append(w + 'ون')
+                    A.append(w + 'ين')
+                    A.append(w + 'ات')
+
+            for a in A : 
+                AllWords2[a] = Plural_Number
+
+        AllWords.update(AllWords1)    
+        AllWords.update(AllWords2)    
+        return AllWords
+
+
+    def AITwoWordsManiPulate(word1,word2): 
+        Result = {}
+        for i  in AIOneWordManiPulate(word1).keys() : 
+            for j in AIOneWordManiPulate(word2).keys() : 
+                Result[f'{i} {j}'] = 0.7
+                Result[f'{j} {i}'] = 0.6
+        Result[f'{word1} {word2}'] = 1.0
+        Result[f'{word2} {word1}'] = 0.9
+
+        return Result
+        
+        
+    def AIMoreWordsManiPulate(text): 
+        word1 = text.split()[0]
+        word2 = text.split()[1]
+        word3 = text.split()[2]
+        
+        Rest =' '.join(text.split()[3:]) 
+        print(Rest)
+        Result = {}
+        for i  in AIOneWordManiPulate(word1).keys() : 
+            for j in AIOneWordManiPulate(word2).keys() : 
+                for k in AIOneWordManiPulate(word3).keys() : 
+                    Result[f'{i} {j} {k} {Rest}'] = 0.7
+                    Result[f'{i} {k} {j} {Rest}'] = 0.7
+                    Result[f'{j} {i} {k} {Rest}'] = 0.6
+                    Result[f'{j} {k} {i} {Rest}'] = 0.6
+                    Result[f'{k} {i} {j} {Rest}'] = 0.5
+                    Result[f'{k} {j} {i} {Rest}'] = 0.5
+                    
+        Result[f'{word1} {word2} {word3} {Rest}'] = 1.0
+        Result[f'{word1} {word3} {word2} {Rest}'] = 0.9
+        Result[f'{word2} {word1} {word3} {Rest}'] = 0.8
+        Result[f'{word2} {word3} {word1} {Rest}'] = 0.8
+        Result[f'{word3} {word1} {word2} {Rest}'] = 0.8
+        Result[f'{word3} {word2} {word1} {Rest}'] = 0.8
+
+        return Result
+               
+        
+        
+        
+        
+    if len(text.split()) ==0 : 
+        Result = ''
+    elif len(text.split()) ==1 : 
+        Result = AIOneWordManiPulate(text)
+    elif len(text.split()) ==2 : 
+        Result = AITwoWordsManiPulate(text.split()[0],text.split()[1])
+    elif len(text.split()) > 2 : 
+        Result = AIMoreWordsManiPulate(text)
+
+    return Result
+
+
+
+
+AISearchEngine('عامل')
+
+
+# {'عامل': 1,
+#  'العامل': 0.9,
+#  'عاملة': 0.7,
+#  'عامله': 0.7,
+#  'العاملة': 0.7,
+#  'العامله': 0.7,
+#  'عاملون': 0.9,
+#  'عاملين': 0.9,
+#  'عاملات': 0.9,
+#  'العاملون': 0.9,
+#  'العاملين': 0.9,
+#  'العاملات': 0.9}
+
+
+####################################
+
+AISearchEngine('لاعب كرة')
+
+# {'لاعب كرة': 1.0,
+#  'كرة لاعب': 0.9,
+#  'لاعب الكرة': 0.7,
+#  'الكرة لاعب': 0.6,
+#  'لاعب كره': 0.7,
+#  'كره لاعب': 0.6,
+#  'لاعب الكره': 0.7,
+#  'الكره لاعب': 0.6,
+#  'اللاعب كرة': 0.7,
+#  'كرة اللاعب': 0.6,
+#  'اللاعب الكرة': 0.7,
+#  'الكرة اللاعب': 0.6,
+#  'اللاعب كره': 0.7,
+#  'كره اللاعب': 0.6,
+#  'اللاعب الكره': 0.7,
+#  'الكره اللاعب': 0.6,
+#  'لاعبة كرة': 0.7,
+#  'كرة لاعبة': 0.6,
+#  'لاعبة الكرة': 0.7,
+#  'الكرة لاعبة': 0.6,
+#  'لاعبة كره': 0.7,
+#  'كره لاعبة': 0.6,
+#  'لاعبة الكره': 0.7,
+#  'الكره لاعبة': 0.6,
+#  'لاعبه كرة': 0.7,
+#  'كرة لاعبه': 0.6,
+#  'لاعبه الكرة': 0.7,
+#  'الكرة لاعبه': 0.6,
+#  'لاعبه كره': 0.7,
+#  'كره لاعبه': 0.6,
+#  'لاعبه الكره': 0.7,
+#  'الكره لاعبه': 0.6,
+#  'اللاعبة كرة': 0.7,
+#  'كرة اللاعبة': 0.6,
+#  'اللاعبة الكرة': 0.7,
+#  'الكرة اللاعبة': 0.6,
+#  'اللاعبة كره': 0.7,
+#  'كره اللاعبة': 0.6,
+#  'اللاعبة الكره': 0.7,
+#  'الكره اللاعبة': 0.6,
+#  'اللاعبه كرة': 0.7,
+#  'كرة اللاعبه': 0.6,
+#  'اللاعبه الكرة': 0.7,
+#  'الكرة اللاعبه': 0.6,
+#  'اللاعبه كره': 0.7,
+#  'كره اللاعبه': 0.6,
+#  'اللاعبه الكره': 0.7,
+#  'الكره اللاعبه': 0.6,
+#  'لاعبون كرة': 0.7,
+#  'كرة لاعبون': 0.6,
+#  'لاعبون الكرة': 0.7,
+#  'الكرة لاعبون': 0.6,
+#  'لاعبون كره': 0.7,
+#  'كره لاعبون': 0.6,
+#  'لاعبون الكره': 0.7,
+#  'الكره لاعبون': 0.6,
+#  'لاعبين كرة': 0.7,
+#  'كرة لاعبين': 0.6,
+#  'لاعبين الكرة': 0.7,
+#  'الكرة لاعبين': 0.6,
+#  'لاعبين كره': 0.7,
+#  'كره لاعبين': 0.6,
+#  'لاعبين الكره': 0.7,
+#  'الكره لاعبين': 0.6,
+#  'لاعبات كرة': 0.7,
+#  'كرة لاعبات': 0.6,
+#  'لاعبات الكرة': 0.7,
+#  'الكرة لاعبات': 0.6,
+#  'لاعبات كره': 0.7,
+#  'كره لاعبات': 0.6,
+#  'لاعبات الكره': 0.7,
+#  'الكره لاعبات': 0.6,
+#  'اللاعبون كرة': 0.7,
+#  'كرة اللاعبون': 0.6,
+#  'اللاعبون الكرة': 0.7,
+#  'الكرة اللاعبون': 0.6,
+#  'اللاعبون كره': 0.7,
+#  'كره اللاعبون': 0.6,
+#  'اللاعبون الكره': 0.7,
+#  'الكره اللاعبون': 0.6,
+#  'اللاعبين كرة': 0.7,
+#  'كرة اللاعبين': 0.6,
+#  'اللاعبين الكرة': 0.7,
+#  'الكرة اللاعبين': 0.6,
+#  'اللاعبين كره': 0.7,
+#  'كره اللاعبين': 0.6,
+#  'اللاعبين الكره': 0.7,
+#  'الكره اللاعبين': 0.6,
+#  'اللاعبات كرة': 0.7,
+#  'كرة اللاعبات': 0.6,
+#  'اللاعبات الكرة': 0.7,
+#  'الكرة اللاعبات': 0.6,
+#  'اللاعبات كره': 0.7,
+#  'كره اللاعبات': 0.6,
+#  'اللاعبات الكره': 0.7,
+#  'الكره اللاعبات': 0.6}
+
+
+############################################
+
+
+def AISearchEngine(text) : 
+    text = text.strip()
+    Result = {}
+    Titles = []
+    ExcludedWords = []
+    Grades = [1.0,0.95,0.80,0.7,0.5,0.4]
+    def ChangeOneWord(w) : 
+        AllWords = []
+        AllWords.append(w)
+        if w[:2] != 'ال' :
+            nw = ('ال' + w)
+            AllWords.append(nw)
+        if w[0] in ['ا','إ','أ'] and  w[1] != 'ل' :
+            nw = ('ا' + w[1:])
+            AllWords.append(nw)
+            nw = ('أ' + w[1:])
+            AllWords.append(nw)
+            nw = ('إ' + w[1:])
+            AllWords.append(nw)
+        if w[0] == 'أ' and  w[1] != 'ل' :
+            nw = ('ا' + w[1:])
+            AllWords.append(nw)
+        if w[-1] == 'ه' : 
+            nw = (w[:-1] + 'ة')
+            AllWords.append(nw)
+        if w[-1] == 'ة' : 
+            nw = (w[:-1] + 'ه')
+            AllWords.append(nw)
+        if w[-1] == 'ى' : 
+            nw = (w[:-1] + 'ي')
+            AllWords.append(nw)
+        if w[-1] == 'ي' : 
+            nw = (w[:-1] + 'ى')
+            AllWords.append(nw)
+        if w[:2] == 'ال' : 
+            nw = w[2:]
+            AllWords.append(nw)
+        return list(set(AllWords))
+    f = open('Excluded.txt','r',encoding = 'utf-8')
+    for line in f : 
+        ExcludedWords.extend(ChangeOneWord(line.strip()))
+    f.close()
+  
+    def ChangeWord(t,ExcludedWords=ExcludedWords) : 
+        ThisList =[]
+        UniqueList = []
+        AllWords = []
+        for n,w in enumerate(t.split()) : 
+            AllWords.append([])
+            AllWords[n].append(w)
+            UniqueList.append(w)
+            if w[:2] != 'ال' :
+                nw = ('ال' + w)
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+            if w[0] in ['ا','إ','أ'] and  w[1] != 'ل' :
+                nw = ('ا' + w[1:])
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+                nw = ('أ' + w[1:])
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+                nw = ('إ' + w[1:])
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+            if w[0] == 'أ' and  w[1] != 'ل' :
+                nw = ('ا' + w[1:])
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+            if w[-1] == 'ه' : 
+                nw = (w[:-1] + 'ة')
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+            if w[-1] == 'ة' : 
+                nw = (w[:-1] + 'ه')
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+            if w[-1] == 'ى' : 
+                nw = (w[:-1] + 'ي')
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+            if w[-1] == 'ي' : 
+                nw = (w[:-1] + 'ى')
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+            if w[:2] == 'ال' : 
+                nw = (w[2:])
+                AllWords[n].append(nw)
+                UniqueList.append(nw)
+        AllWords= [list(set(i)) for i in AllWords]
+        if len(AllWords) ==1 : 
+            ThisList = AllWords[0]
+        elif len(AllWords) ==2 : 
+            for i in AllWords[0] : 
+                for j in AllWords[1] : 
+                    ThisList.append(f'{i} {j}')
+                    ThisList.append(f'{j} {i}')
+        elif len(AllWords) ==3 : 
+            for i in AllWords[0] : 
+                for j in AllWords[1] : 
+                    for k in AllWords[2] : 
+                        ThisList.append(f'{i} {j} {k}')
+                        ThisList.append(f'{i} {k} {j}')
+                        ThisList.append(f'{j} {i} {k}')
+                        ThisList.append(f'{j} {k} {i}')
+                        ThisList.append(f'{k} {i} {j}')
+                        ThisList.append(f'{k} {j} {i}')
+        elif len(AllWords)  > 3 : 
+            Rest =' '.join(t.split()[3:]) 
+            for i in AllWords[0] : 
+                for j in AllWords[1] : 
+                    for k in AllWords[2] : 
+                        ThisList.append(f'{i} {j} {k} {Rest}')
+                        ThisList.append(f'{i} {k} {j} {Rest}')
+                        ThisList.append(f'{j} {i} {k} {Rest}')
+                        ThisList.append(f'{j} {k} {i} {Rest}')
+                        ThisList.append(f'{k} {i} {j} {Rest}')
+                        ThisList.append(f'{k} {j} {i} {Rest}')
+        
+        
+        
+        
+        
+        UniqueList = [j for j in set(UniqueList) if not j in ExcludedWords]
+        return ThisList,UniqueList
+        
+    ThisList,UniqueList = ChangeWord(text)        
+    f = open('titles.txt','r',encoding = 'utf-8')
+    for line in f : 
+        Titles.append(line.strip())
+    f.close()
+    for title in Titles : 
+        if text ==  title : 
+            Result[title] = Grades[0]
+        elif ''.join(text.split()) == ''.join(title.split()) : 
+            Result[title] = Grades[1]
+        elif set(text.split()) == set(title.split()) : 
+            Result[title] = Grades[2]
+        elif text in title and abs(len(text) - len(title)) <=3 : 
+            Result[title] = Grades[2]
+        else : 
+            for t in ThisList : 
+                if set(t.split()) == set(title.split()) : 
+                    Result[title] = Grades[3]
+    if len(Result.keys()) < 10 : 
+        for title in Titles : 
+            for t in ThisList : 
+                if t in title and not (title in Result.keys()) : 
+                    Result[title] = Grades[4]
+    if len(Result.keys()) < 10 : 
+        for title in Titles : 
+            for t in UniqueList : 
+                if t in title and not (title in Result.keys()) : 
+                    Result[title] = Grades[5]
+                    
+        
+    return Result
+
+
+
+AISearchEngine('الكتاب الأخضر')
+
+
+# {'الكتاب الأخضر': 1.0,
+#  'الكتاب الأبيض': 0.4,
+#  'الكتاب الأسود': 0.4,
+#  'القانون (كتاب فرنسي)': 0.4,
+#  'كتاب اليهودية والماسونية': 0.4,
+#  'الكتاب الباشي': 0.4,
+#  'كتاب البدو': 0.4,
+#  'كتاب البلدان النجدية في المصادر التاريخية': 0.4,
+#  'كتاب السيرة وأخبار الأئمة': 0.4,
+#  'كتاب الطبقات الكبير': 0.4,
+#  'كتاب الفهرست': 0.4,
+#  'كتاب تاريخ الفتح العربي في ليبيا': 0.4,
+#  'كتاب عشائر الشام': 0.4,
+#  'كتاب واحة الأحساء': 0.4}

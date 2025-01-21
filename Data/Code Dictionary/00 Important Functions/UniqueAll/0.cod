@@ -1,0 +1,7 @@
+def UniqueAll(show_value = True) : 
+    global data
+    for col in data.columns : 
+        print(f'Length of unique data for   {col}   is    {len(data[col].unique())} ')
+        if show_value == True  : 
+            print(f'unique values ae {data[col].unique()[:5]}' )
+            print('-----------------------------')

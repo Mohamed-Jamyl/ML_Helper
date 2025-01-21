@@ -1,0 +1,5 @@
+XFeature = data['']
+YFeature = data['']
+
+plt.figure(figsize=(15,5))
+sns.catplot(y=YFeature ,x=XFeature,data=train_data.sort_values(YFeature,ascending=False),kind='boxen')

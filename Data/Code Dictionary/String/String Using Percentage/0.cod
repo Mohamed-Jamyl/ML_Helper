@@ -1,0 +1,11 @@
+aaa = "alabama"
+a = "sweet home %s" %aaa	#use string
+------------------------------------------
+bbb = 136
+a = "sweet home %d" %bbb #use numbers
+------------------------------------------
+a = "sweet %s %d" % ( aaa , bbb)  #both
+------------------------------------------
+a = "numbers %5d" %7   #add spaces
+------------------------------------------
+a = "numbers %05d" %7   #add zeros

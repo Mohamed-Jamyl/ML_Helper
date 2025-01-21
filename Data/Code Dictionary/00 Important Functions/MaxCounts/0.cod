@@ -1,0 +1,16 @@
+def MaxCounts(feature, number, return_rest = False) : 
+    global data
+    counts = data[feature].value_counts()
+    values_list = list(counts[:number].values)
+    rest_value =  sum(counts.values) - sum (values_list)
+    index_list = list(counts[:number].index)
+
+    if return_rest : 
+        values_list.append(rest_value )
+        index_list.append('rest items')
+
+    result = pd.Series(values_list, index=index_list)
+
+    if len(data[feature]) <= number : 
+        result = None
+    return result

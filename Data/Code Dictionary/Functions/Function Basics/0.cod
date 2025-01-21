@@ -1,0 +1,17 @@
+def star() : 
+    for h in range(10) : 
+        print ('**')
+
+star()
+------------------------------------------
+def star() : 
+    for h in range(10) : 
+        print ('**')
+
+s=star
+s()
+------------------------------------------
+def find_avg(a,b):
+        average = (a+b)/2
+        print ("average is ",average)
+find_avg(2,3)

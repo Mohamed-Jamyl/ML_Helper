@@ -1,0 +1,22 @@
+!pip install python-bidi
+!pip install arabic_reshaper
+
+from arabic_reshaper import arabic_reshaper
+from bidi.algorithm import get_display
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+
+def ArabicWordCloud(text , title = 'Word Clouds' , w = 15 , h = 15):
+    plt.figure(figsize=(w,h))
+    text = get_display(arabic_reshaper.reshape(str(text)))
+    plt.imshow(WordCloud(font_path='/content/drive/MyDrive/Data/Rawan/MBKhursheed.ttf',background_color = 'white').generate(text))
+    plt.axis("off")
+    plt.title(title)
+    plt.show()  
+
+
+
+ArabicWordCloud(data["Text"].tolist())

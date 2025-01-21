@@ -1,0 +1,22 @@
+def WordSimilarity(w1,w2) : 
+    w1 = w1.strip()
+    w2 = w2.strip()
+    if len(w1) ==0 or len(w2) ==0  : return 0
+    Degree1 ,Degree2 = 0,0
+    for i in range(len(w1)-1) :
+        if w1[i:i+2] in w2 : 
+            Degree1+=1
+    Degree1/=len(w1)-1        
+    for i in range(len(w2)-1) :
+        if w2[i:i+2] in w1 : 
+            Degree2+=1
+    Degree2/=len(w2)-1  
+    
+    SimilarityDegree = max(Degree1,Degree2)
+    if SimilarityDegree > 0.9 and w1 != w2:  SimilarityDegree *= 0.9
+    print( SimilarityDegree)
+    
+    return  SimilarityDegree
+
+
+WordSimilarity('تشيكوسلوفاكيا','تشيكسلوفاكيا')

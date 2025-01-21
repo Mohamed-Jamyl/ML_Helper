@@ -1,0 +1,11 @@
+def FeatureImportance(X,y,model,width=10,height=25) : 
+    model.fit(X, y)
+    fi = model.feature_importances_
+    indices = np.argsort(fi)
+    features = X.columns
+    fig, ax = plt.subplots(figsize=(width,height))
+    plt.title('Feature Importances')
+    plt.barh(range(len(indices)), fi[indices], color='b', align='center')
+    plt.yticks(range(len(indices)), features[indices])
+    plt.xlabel('Importance')
+    return features[indices[::-1]] , indices[::-1]

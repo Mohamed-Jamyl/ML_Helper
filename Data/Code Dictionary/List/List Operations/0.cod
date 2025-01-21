@@ -1,0 +1,16 @@
+a or b
+a and b
+a | b
+a.union(b)
+b.union(a)
+------------------------------------------
+a & b
+a.intersection(b)
+------------------------------------------
+a ^ b
+a.symmetric_difference(b)
+b.symmetric_difference(a)
+------------------------------------------
+a - b
+a.difference(b)
+

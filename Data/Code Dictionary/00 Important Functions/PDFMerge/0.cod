@@ -1,0 +1,24 @@
+!pip install PyPDF2
+from PyPDF2 import PdfFileWriter, PdfFileReader
+import os
+
+
+path = r' '
+output = PdfFileWriter()
+K=0
+for i in os.listdir(path) : 
+#     if K ==40 : break
+    try:
+        
+        File = os.path.join(path,i)
+        inputpdf = PdfFileReader(open(File, "rb"))
+        for j in range(inputpdf.numPages):
+            output.addPage(inputpdf.getPage(j))
+        print(File)
+        K+=1
+    except : 
+        print(f'ERROR : {File}')
+        pass
+    
+with open(os.path.join(path,'_All.pdf'), "wb") as outputStream:
+    output.write(outputStream)      

@@ -1,0 +1,396 @@
+from PyQt5 import QtCore, QtGui, QtWidgets
+import pandas as pd
+import os
+
+StudentName = ''
+Test1Index,Test2Index,Test3Index = 0,0,0
+TestType = 1
+
+Path = r'Data'
+
+Test1Instructions = open(os.path.join(Path,'Test1Instructions.txt'),'r', encoding="utf8")
+Test1Instructions = Test1Instructions.read()
+
+Test2Instructions = open(os.path.join(Path,'Test2Instructions.txt'),'r', encoding="utf8")
+Test2Instructions = Test2Instructions.read()
+
+Test3Instructions = open(os.path.join(Path,'Test3Instructions.txt'),'r', encoding="utf8")
+Test3Instructions = Test3Instructions.read()
+
+
+Test1 = pd.read_excel(os.path.join(Path,'Test1.xlsx'))
+Test1Questions = Test1['Question'].tolist()
+Test1a = Test1['a'].tolist()
+Test1b = Test1['b'].tolist()
+Test1c = Test1['c'].tolist()
+Test1d = Test1['d'].tolist()
+Test1Answer = Test1['Answer'].tolist()
+Test1UserAnswer = []
+
+
+Test2 = pd.read_excel(os.path.join(Path,'Test2.xlsx'))
+Test2Questions = Test2['Question'].tolist()
+Test2a = Test2['a'].tolist()
+Test2b = Test2['b'].tolist()
+Test2c = Test2['c'].tolist()
+Test2d = Test2['d'].tolist()
+# Test2Answer = Test2['Answer'].tolist()
+Test2UserAnswer = []
+
+
+Test3 = pd.read_excel(os.path.join(Path,'Test3.xlsx'))
+Test3Questions = Test3['Question'].tolist()
+Test3Sector = Test3['Sector'].tolist()
+Test3UserAnswer = []
+
+
+
+
+
+
+class Ui_Dialog(object):
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(1115, 724)
+        Dialog.setLayoutDirection(QtCore.Qt.RightToLeft)
+        Dialog.setWindowTitle("Dialog")
+        font = QtGui.QFont()
+        font.setPointSize(8)
+        
+        self.WLabel = QtWidgets.QLabel(Dialog)
+        self.WLabel.setGeometry(QtCore.QRect(450, 700, 300, 21))
+        self.WLabel.setFont(font)
+        self.WLabel.setObjectName("NameLabel")
+        self.WLabel.setText('.')
+        self.WLabel.setStyleSheet('color: red')
+#         self.WLabel.setStyleSheet("background-color: yellow")
+        self.WLabel.setAlignment(QtCore.Qt.AlignCenter)
+        
+        ############## INTRO
+        self.IntroBox = QtWidgets.QGroupBox(Dialog)
+        self.IntroBox.setGeometry(QtCore.QRect(400, 270, 300, 130))
+        self.IntroBox.setObjectName("IntroBox")
+        self.IntroBox.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.IntroBox.setTitle("البيانات الشخصية")
+        
+        self.AddInfoCMD = QtWidgets.QPushButton(self.IntroBox)
+        self.AddInfoCMD.setGeometry(QtCore.QRect(15, 90, 91, 25))
+        self.AddInfoCMD.setObjectName("NextCMD")
+        self.AddInfoCMD.setText("قبول")
+        
+        self.NameLabel = QtWidgets.QLabel(self.IntroBox)
+        self.NameLabel.setGeometry(QtCore.QRect(210, 20, 70, 21))
+        self.NameLabel.setFont(font)
+        self.NameLabel.setObjectName("NameLabel")
+        self.NameLabel.setText("اسم الطالب")
+        
+        self.NumberLabel = QtWidgets.QLabel(self.IntroBox)
+        self.NumberLabel.setGeometry(QtCore.QRect(210, 50, 70, 21))
+        self.NumberLabel.setFont(font)
+        self.NumberLabel.setObjectName("NumberLabel")
+        self.NumberLabel.setText("رقم الطالب")
+        
+
+        self.NameTxt = QtWidgets.QLineEdit(self.IntroBox)
+        self.NameTxt.setGeometry(QtCore.QRect(20, 20, 180, 21))
+        self.NumberTxt = QtWidgets.QLineEdit(self.IntroBox)
+        self.NumberTxt.setGeometry(QtCore.QRect(20, 50, 180, 21))
+        
+        self.NameTxt.setText('أحمد محمد عبد الله السيد')
+        self.NumberTxt.setText('.')
+
+        
+        ############## INSTRUCTION
+        self.InstructionBox = QtWidgets.QGroupBox(Dialog)
+        self.InstructionBox.setGeometry(QtCore.QRect(10, 10, 1091, 661))
+        self.InstructionBox.setObjectName("InstructionBox")
+        self.InstructionBox.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.InstructionBox.setTitle("التعليمات")
+
+        self.InstructionOKCMD = QtWidgets.QPushButton(self.InstructionBox)
+        self.InstructionOKCMD.setGeometry(QtCore.QRect(10, 620, 111, 31))
+        self.InstructionOKCMD.setObjectName("InstructionOKCMD")
+        self.InstructionOKCMD.setText("ابدأ")
+        
+        self.InstructionLabel = QtWidgets.QLabel(self.InstructionBox)
+        self.InstructionLabel.setGeometry(QtCore.QRect(280, 20, 800, 520))
+        self.InstructionLabel.setFont(font)
+        self.InstructionLabel.setObjectName("NumberLabel")
+        self.InstructionLabel.setText(Test1Instructions)
+        self.InstructionLabel.setWordWrap(True)
+        self.InstructionLabel.setLayoutDirection(QtCore.Qt.RightToLeft)
+#         self.InstructionLabel.setStyleSheet("background-color: yellow")
+        self.InstructionLabel.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.InstructionLabel.setFont(font)
+        
+
+        
+        
+        ############## QUESTIONS
+        self.QuestionsBox = QtWidgets.QGroupBox(Dialog)
+        self.QuestionsBox.setGeometry(QtCore.QRect(10, 10, 1091, 661))
+        self.QuestionsBox.setObjectName("QuestionsBox")
+        self.QuestionsBox.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.QuestionsBox.setTitle("الأسئلة")
+
+        font = QtGui.QFont()
+        font.setPointSize(10)
+
+        self.NextCMD = QtWidgets.QPushButton(self.QuestionsBox)
+        self.NextCMD.setGeometry(QtCore.QRect(10, 620, 111, 31))
+        self.NextCMD.setObjectName("NextCMD")
+        self.NextCMD.setText("السؤال التالي")
+
+        self.SectorLabel = QtWidgets.QLabel(self.QuestionsBox)
+        self.SectorLabel.setGeometry(QtCore.QRect(470, 20, 201, 21))
+        self.SectorLabel.setFont(font)
+        self.SectorLabel.setObjectName("SectorLabel")
+        self.SectorLabel.setText("القسم : ")
+        
+        
+        self.DataLabel = QtWidgets.QLabel(self.QuestionsBox)
+        self.DataLabel.setGeometry(QtCore.QRect(775, 20, 301, 21))
+        self.DataLabel.setFont(font)
+        self.DataLabel.setObjectName("DataLabel")
+
+        self.QuestionCounterLabel = QtWidgets.QLabel(self.QuestionsBox)
+        self.QuestionCounterLabel.setGeometry(QtCore.QRect(20, 20, 201, 21))
+        self.QuestionCounterLabel.setFont(font)
+        self.QuestionCounterLabel.setObjectName("QuestionCounterLabel")
+        self.QuestionCounterLabel.setText("سؤال : 1   من   30  ")
+
+       
+        self.QuestionLabel = QtWidgets.QLabel(self.QuestionsBox)
+        self.QuestionLabel.setGeometry(QtCore.QRect(370, 130, 701, 61))
+        self.QuestionLabel.setFont(font)
+        self.QuestionLabel.setObjectName("QuestionLabel")
+        self.QuestionLabel.setText("السؤال : ")
+#         self.QuestionLabel.setStyleSheet("background-color: yellow")
+        self.QuestionLabel.setWordWrap(True)
+        self.QuestionLabel.setStyleSheet('color: green')
+
+        
+        self.Option1 = QtWidgets.QRadioButton(self.QuestionsBox)
+        self.Option1.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.Option1.setGeometry(QtCore.QRect(560, 200, 500, 17))
+        self.Option1.setObjectName("Option1")
+        self.Option1.setFont(font)
+        self.Option2 = QtWidgets.QRadioButton(self.QuestionsBox)
+        self.Option2.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.Option2.setGeometry(QtCore.QRect(560, 250, 500, 17))
+        self.Option2.setObjectName("Option2")
+        self.Option2.setFont(font)
+        self.Option3 = QtWidgets.QRadioButton(self.QuestionsBox)
+        self.Option3.setGeometry(QtCore.QRect(560, 300, 500, 17))
+        self.Option3.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.Option3.setObjectName("Option3")
+        self.Option3.setFont(font)
+        self.Option4 = QtWidgets.QRadioButton(self.QuestionsBox)
+        self.Option4.setGeometry(QtCore.QRect(560, 350, 500, 17))
+        self.Option4.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.Option4.setObjectName("Option4")
+        self.Option4.setFont(font)
+        
+        
+        self.Option1.setText(".")
+        self.Option2.setText(".")
+        self.Option3.setText(".")
+        self.Option4.setText(".")
+        
+        self.ExitCMD = QtWidgets.QPushButton(Dialog)
+        self.ExitCMD.setGeometry(QtCore.QRect(10, 680, 111, 31))
+        self.ExitCMD.setObjectName("ExitCMD")
+        self.ExitCMD.setText("خروج")
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        global StudentName,Test1Index,Test2Index,Test3Index,TestType
+        _translate = QtCore.QCoreApplication.translate
+
+        self.ExitCMD.clicked.connect(sys.exit)
+        Dialog.setWindowIcon(QtGui.QIcon('0.png'))   
+        self.QuestionsBox.setVisible(False)
+        self.InstructionBox.setVisible(False)
+        def AddingInfoDef() : 
+            global StudentName
+            StudentName = self.NameTxt.text().strip()
+            StudentNumber = self.NumberTxt.text().strip()
+            if len(StudentName) == 0 : 
+                self.WLabel.setText('من فضلك أدخل اسم الطالب')
+                return None
+            if len(StudentNumber) == 0 : 
+                self.WLabel.setText('من فضلك أدخل رقم الطالب')
+                return None
+            self.WLabel.setText('')
+            self.InstructionBox.setVisible(True)
+            self.IntroBox.setVisible(False)
+        self.AddInfoCMD.clicked.connect(AddingInfoDef)  
+        
+        def Test1QuestionsLoop() : 
+            global Test1Index,StudentName
+            self.QuestionsBox.setVisible(True)
+            self.InstructionBox.setVisible(False)
+            self.DataLabel.setText(_translate("Dialog", "اسم الطالب : " + StudentName))
+            self.SectorLabel.setText("القسم : الاختبار التحصيلي")
+            
+            if 0 <= Test1Index <=29 : 
+                self.QuestionCounterLabel.setText(f"سؤال : {Test1Index+1}   من   30  ")
+                ThisQuestions = Test1Questions[Test1Index]
+                self.QuestionLabel.setText(ThisQuestions)
+                self.Option1.setText(Test1a[Test1Index])
+                self.Option2.setText(Test1b[Test1Index])
+                self.Option3.setText(Test1c[Test1Index])
+                self.Option4.setText(Test1d[Test1Index])
+
+        def Test2QuestionsLoop() : 
+            global Test2Index,StudentName
+            self.QuestionsBox.setVisible(True)
+            self.InstructionBox.setVisible(False)
+            self.DataLabel.setText(_translate("Dialog", "اسم الطالب : " + StudentName))
+            self.SectorLabel.setText("القسم : مقياس اتخاذ القرار")
+            
+            if 0 <= Test2Index <=29 : 
+                self.QuestionCounterLabel.setText(f"سؤال : {Test2Index+1}   من   30  ")
+                ThisQuestions = Test2Questions[Test2Index]
+                self.QuestionLabel.setText(ThisQuestions)
+                self.Option1.setText(Test2a[Test2Index])
+                self.Option2.setText(Test2b[Test2Index])
+                self.Option3.setText(Test2c[Test2Index])
+                self.Option4.setText(Test2d[Test2Index])
+
+
+        def Test3QuestionsLoop() : 
+            global Test3Index,StudentName
+            self.QuestionsBox.setVisible(True)
+            self.InstructionBox.setVisible(False)
+            self.DataLabel.setText(_translate("Dialog", "اسم الطالب : " + StudentName))
+            self.SectorLabel.setText("القسم : مقياس الممارسات المهنية")
+            self.Option4.setVisible(False)
+            
+            if 0 <= Test2Index <=59 : 
+                self.QuestionCounterLabel.setText(f"سؤال : {Test3Index+1}   من   60  ")
+                ThisQuestions = 'القطاع :   ' + Test3Sector[Test3Index]
+                ThisQuestions += '\n' + Test3Questions[Test3Index]
+                self.QuestionLabel.setText(ThisQuestions)
+                self.Option1.setText('أمارس')
+                self.Option2.setText('لا أمارس')
+                self.Option3.setText('أمارس أحيانا')
+
+        
+        def SelectTestType() : 
+            global TestType
+            if TestType == 1 : 
+                Test1QuestionsLoop()
+            elif TestType == 2 : 
+                Test2QuestionsLoop()
+            elif TestType == 3 : 
+                Test3QuestionsLoop()
+                
+            
+            
+    
+        
+        def NextQuestion() : 
+            global Test1Index,Test2Index,Test3Index,TestType
+            if TestType == 1 : 
+                for Op in [self.Option1,self.Option2,self.Option3,self.Option4] : 
+                    if Op.isChecked() : 
+                        Test1UserAnswer.append(Op.text())
+
+                if self.Option1.isChecked() or self.Option2.isChecked() or self.Option3.isChecked() or self.Option4.isChecked() : 
+                    if Test1Index < 29 : 
+                        Test1Index+=1
+                        Test1QuestionsLoop()
+                        self.Option1.setAutoExclusive(False)
+                        self.Option2.setAutoExclusive(False)
+                        self.Option3.setAutoExclusive(False)
+                        self.Option4.setAutoExclusive(False)
+                        self.Option1.setChecked(True)
+                        self.Option2.setChecked(False)
+                        self.Option3.setChecked(False)
+                        self.Option4.setChecked(False)
+                        self.Option1.setAutoExclusive(True)
+                        self.Option2.setAutoExclusive(True)
+                        self.Option3.setAutoExclusive(True)
+                        self.Option4.setAutoExclusive(True)
+                    else : 
+                        TestType+=1
+                        self.InstructionBox.setVisible(True)
+                        self.QuestionsBox.setVisible(False)
+                        self.InstructionLabel.setText(Test2Instructions)
+
+                else : 
+                    self.WLabel.setText('اختر إجابة أولا')
+            elif TestType == 2 : 
+                for Op in [self.Option1,self.Option2,self.Option3,self.Option4] : 
+                    if Op.isChecked() : 
+                        Test2UserAnswer.append(Op.text())
+
+                if self.Option1.isChecked() or self.Option2.isChecked() or self.Option3.isChecked() or self.Option4.isChecked() : 
+                    if Test2Index < 29 : 
+                        Test2Index+=1
+                        Test2QuestionsLoop()
+                        self.Option1.setAutoExclusive(False)
+                        self.Option2.setAutoExclusive(False)
+                        self.Option3.setAutoExclusive(False)
+                        self.Option4.setAutoExclusive(False)
+                        self.Option1.setChecked(True)
+                        self.Option2.setChecked(False)
+                        self.Option3.setChecked(False)
+                        self.Option4.setChecked(False)
+                        self.Option1.setAutoExclusive(True)
+                        self.Option2.setAutoExclusive(True)
+                        self.Option3.setAutoExclusive(True)
+                        self.Option4.setAutoExclusive(True)
+                    else : 
+                        TestType+=1
+                        self.InstructionBox.setVisible(True)
+                        self.QuestionsBox.setVisible(False)
+                        self.InstructionLabel.setText(Test3Instructions)
+                else : 
+                    self.WLabel.setText('اختر إجابة أولا')
+            elif TestType == 3 : 
+                for Op in [self.Option1,self.Option2,self.Option3] : 
+                    if Op.isChecked() : 
+                        Test3UserAnswer.append(Op.text())
+
+                if self.Option1.isChecked() or self.Option2.isChecked() or self.Option3.isChecked() : 
+                    if Test3Index < 59 : 
+                        Test3Index+=1
+                        Test3QuestionsLoop()
+                        self.Option1.setAutoExclusive(False)
+                        self.Option2.setAutoExclusive(False)
+                        self.Option3.setAutoExclusive(False)
+                        self.Option1.setChecked(True)
+                        self.Option2.setChecked(False)
+                        self.Option3.setChecked(False)
+                        self.Option1.setAutoExclusive(True)
+                        self.Option2.setAutoExclusive(True)
+                        self.Option3.setAutoExclusive(True)
+                    else : 
+                        TestType+=1
+                        self.InstructionBox.setVisible(True)
+                        self.QuestionsBox.setVisible(False)
+                        self.InstructionLabel.setText('Done')
+                else : 
+                    self.WLabel.setText('اختر إجابة أولا')
+                    
+            
+            
+        self.InstructionOKCMD.clicked.connect(SelectTestType)  
+        self.NextCMD.clicked.connect(NextQuestion)  
+        
+
+
+
+import sys
+app = QtWidgets.QApplication(sys.argv)
+Dialog = QtWidgets.QDialog()
+ui = Ui_Dialog()
+ui.setupUi(Dialog)
+Dialog.show()
+sys.exit(app.exec_()) 

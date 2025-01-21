@@ -1,0 +1,5 @@
+def SPie(series) : 
+    global data
+    fig, ax = plt.subplots(figsize=(10,6))
+    plt.pie(series.values,labels=list(series.index),autopct ='%1.2f%%',labeldistance = 1.1,explode = [0.05 for i in range(len(series.values))])
+    plt.show()

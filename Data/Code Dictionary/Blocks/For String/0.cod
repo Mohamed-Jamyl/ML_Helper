@@ -1,0 +1,24 @@
+Y = 'supercalifragilisticexpialidocious'
+for n in range(len(Y)) :
+print (Y[n])
+------------------------------------------
+S = ' '
+Y = 'supercalifragilisticexpialidocious'
+for n in range(len(Y)) :
+S = S + Y[(len(Y) - n-1)]
+------------------------------------------
+t = 'supercalifragilisticexpialidocious'
+for v in t :
+if v == 'x' :
+Continue
+print v
+------------------------------------------
+t = "divide"
+for v in t : 
+	If v == "i" : 
+Continue
+print(v) 
+------------------------------------------
+YY = "how are you doing"
+for g in YY : 
+	print (g)

@@ -1,0 +1,88 @@
+import pandas as pd
+import numpy as np
+
+
+# In[7]:
+
+
+pd.DataFrame(columns=['Owner','Product','UsedFor','Category','Price','Country','City','Delivery','Rating','Reviews'])
+
+
+# In[48]:
+
+
+Owners = ['المتحدة','الليث المحدودة','الأرض الخضراء','فدادين','شركة دهب الزراعية','مؤسسة دمياط الجديدة','شركة الفيوم للاستثمارات','الاستشاريون للزراعة','خير الأرض للمنتجات الزراعية',]
+Products = ['سماد','جرار زراعي','تقاوي','شتلات','مكافحة حشرات','أدوات زراعية']
+UsedFors = {'سماد':'مساعدة النباتات أثناء النمو'
+                ,'جرار زراعي':'حرث الأرض'
+                ,'تقاوي':'مكافحة أمراض النباتات'
+                ,'شتلات':'زراعة شجيرات صغيرة'
+                ,'مكافحة حشرات':'مكافحة جميع أنواع الحشرات الزراعية'
+                ,'أدوات زراعية':'مساعدة المزارع في جميع عمليات الاراضي الزراعية'}
+Category= {'سماد':'دواء'
+                ,'جرار زراعي':'أدوات'
+                ,'تقاوي':'دواء'
+                ,'شتلات':'نبات'
+                ,'مكافحة حشرات':'دواء'
+                ,'أدوات زراعية':'أدوات'}
+City1= ['القاهرة','الاسكندرية','الجيزة','الفيوم','الشرقية','دمياط','المنوفية','المنيا','اسيوط','سوهاج','قنا','أسوان']
+City2= ['دبي','ابو ظبي','الشارقة','أم قوين','الفجيرة','راس الخيمة','عجمان']
+
+Delivery= ['لا يوجد توصيل','الاستلام من الفرع الرئيسي','الاستلام من الفرع المحلي','التوصيل حتي المنزل ']
+
+Reviews= {'ممتاز':'خمس نجوم',
+          'الخدمة معقولة':'ثلاث نجوم',
+          'للأسف الخدمة سيئة جدا':'نجمة واحدة',
+          'التوصيل يأتي متأخرا':'نجمتين',
+          'السعر ممتاز':'أربع نجوم',
+          'البضاعة تأتي تالفة ':'نجمة واحدة',
+          'السعر غالي للأسف':'ثلاث نجوم',
+          'الخدمة أكثر من رائعة':'خمس نجوم',
+          'المنتج جميل لكن السعر غالي':'أربع نجوم',
+          'المنتج ليس كما رأيناه في الصورة ':'نجمتين',
+          'قليلين الذوق في التعامل':'نجمة واحدة'}
+
+
+# In[63]:
+
+
+N = 10000
+Data = {'Owner':[np.random.choice(Owners) for i in range(N)],
+        'Product':[str(np.random.choice(Products)) for i in range(N)],
+        'City':[np.random.choice(City1+City2) for i in range(N)],
+        'Delivery':[np.random.choice(Delivery) for i in range(N)],
+        'Reviews':[np.random.choice(list(Reviews.keys())) for i in range(N)],
+        'Website':[f'www.agri-{np.random.randint(1000,9000)}.com' for i in range(N)],
+       }
+Data = pd.DataFrame(Data)
+Data['UsedFor'] = Data['Product'].apply(lambda x : UsedFors[x])
+Data['Category'] = Data['Product'].apply(lambda x : Category[x])
+Data['Country'] = Data['City'].apply(lambda x : 'مصر' if x in City1 else 'الإمارات العربية المتحدة')
+Data['Price'] = Data['Country'].apply(lambda x : f'{10*np.random.randint(1000)} جنيه مصري' if x=='مصر' else f'{10*np.random.randint(1000)} درهم إماراتي' )
+Data['Phone'] = Data['Country'].apply(lambda x : f'0020-0{np.random.randint(10000000,90000000)}' if x=='مصر' else f'00971-0{np.random.randint(10000000,90000000)}' )
+Data['Rating'] = Data['Reviews'].apply(lambda x : Reviews[x])
+Data['Email'] = Data['Website'].apply(lambda x : 'info@'+x.replace('www.',''))
+
+Data['Product']=Data['Product'].apply(lambda x : x+'-'+str(np.random.randint(100,900)))
+
+
+Data
+
+
+# In[64]:
+
+
+Data.to_excel('data.xlsx')
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+

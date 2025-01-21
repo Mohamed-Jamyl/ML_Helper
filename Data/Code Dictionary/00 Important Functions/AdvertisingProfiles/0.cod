@@ -1,0 +1,236 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+import pandas as pd
+
+
+# In[2]:
+
+
+KeyWords =  {'Sport- Football': ['fifa','euro2020','concaf','كرة قدم','كورة','فيفا','منتخب','الاهلي','الزمالك'],
+             'Sport Other':[],
+             'Religion - Islam': ['quran','salah','ramadan','قرآن','صلاة','صيام','رمضان'],
+             'Religion Christianity':[],
+             'Religion Other': [],
+             'Movies': [],
+             'Songs - Arabic':[],
+             'Songs - Western': [],
+             'Society - Children':[],
+             'Socitey - Marriage': [],
+             'Socity - Other':[],
+             'Politics - Arabic':[],
+             'Politics - Western':[],
+             'Psychology': [],
+             'Environment':[],
+             'Economy': [],
+             'IT And Computers': ['IT','computer science','machine learning','الذكاء الاصطناعي','علوم الحاسب','البرمجة','programming'],
+             'Study and Scholarships': [],
+             'Architecture':[],
+             'History - Arabic':[],
+             'History - Western':[],
+             'Food': [],
+             'Health and Fitness':[],
+             'Medical Field -Science': [],
+             'Medical Field - Popular': [],
+             'Law':[],
+             'Engineering': [],
+             'Teens': [],
+             'Images and Photography': [],
+             'Edit and Design': [],
+             'Agriculture': [],
+             'Reading and Books':[],
+             'Stories and Novels': [],
+             'Travel and Tourism':[],
+             'Engagement and Marriage': [],
+             'Buying and Trading': [],
+            }
+            
+
+
+# In[3]:
+
+
+def AI_Adv_WriteKW(KeyWords) : 
+    KeyWordsDF = pd.DataFrame(columns = ['Topic','KeyWords'])
+    j=0 
+    for a,b in KeyWords.items() :
+        KeyWordsDF.loc[j] = [a,b]
+        j+=1
+    KeyWordsDF.to_csv('KeyWords.csv',index = False)
+    return None
+
+
+# In[4]:
+
+
+AI_Adv_WriteKW(KeyWords)
+
+
+# In[5]:
+
+
+def AI_Adv_ReadKW(File) : 
+    KeyWordsDF= pd.read_csv(File,encoding = 'utf-8')
+    KeyWords = {}
+    for i in range(KeyWordsDF.shape[0]) :
+        KeyWords[KeyWordsDF['Topic'][i]] = KeyWordsDF['KeyWords'][i]
+    
+    return KeyWords
+
+
+# In[6]:
+
+
+KeyWordsDict = AI_Adv_ReadKW('KeyWords.csv') 
+
+
+# In[7]:
+
+
+KeyWordsDict
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[8]:
+
+
+Profiles= pd.read_csv('Profiles.csv')
+Groups= pd.read_csv('Groups.csv')
+Pages= pd.read_csv('Pages.csv')
+
+
+# In[9]:
+
+
+Profiles.head(10)
+
+
+# In[10]:
+
+
+Profiles.columns
+
+
+# In[ ]:
+
+
+
+
+
+# In[11]:
+
+
+KeyWordsDict
+
+
+# In[12]:
+
+
+ThisAd1 = {'AdID':'246523135',
+          'UserID':'Pr7458512',
+          'PageID':'Pg788542',
+          'Currency':'Euro',
+          'Duration':'6',
+          'StartDay':'12-09-2021',           
+          'Language':'Arabic',
+          'Age':'25-39',
+          'Gender':['0.8','0.2'],
+          'Cities':['Cairo','Giza','Alexandria'],
+          'KeyWords':['IT','computer science','machine learning','الذكاء الاصطناعي','علوم الحاسب','البرمجة','programming'],
+          'Work':['a','c','e'],
+          'Education':['']
+          }
+
+
+# In[13]:
+
+
+ThisAd1
+
+
+# In[15]:
+
+
+ThisAd2 = {'AdID':'246523135',
+          'UserID':'Pr7458512',
+          'PageID':'Pg788542',
+          'Currency':'Euro',
+          'Duration':'6',
+          'StartDay':'12-09-2021',           
+          'Language':'Arabic',
+          'Age':'25-39',
+          'Gender':['0.8','0.2'],
+          'Cities':['Cairo','Giza','Alexandria'],
+          'KeyWords':['صيام','computer science','فيفا','البرمجة'],
+          'Work':['a','c','e'],
+          'Education':['']
+          }
+
+
+# In[ ]:
+
+
+
+
+
+# In[32]:
+
+
+def AI_Adv_Get(Ad,KeyWords,data) : 
+    Topics = []
+    for k in Ad['KeyWords'] : 
+        for a,b in KeyWords.items() : 
+            if k in b : 
+                Topics.append(a)
+    Topics = [i for i in set(Topics)]
+    data= data.reset_index(drop=True)
+    data['AdRank'] = 0
+    Rank = 0
+    for i in range(data.shape[0]) : 
+        Rank = 0
+        if data['Language'][i] == Ad['Language'] : 
+            Rank +=10
+        if int(Ad['Age'].split('-')[0]) < int(data['Age'][i]) <int(Ad['Age'].split('-')[1]) : 
+            Rank +=10
+        
+        
+    return Rank
+
+
+# In[33]:
+
+
+AI_Adv_Get(ThisAd1,KeyWordsDict,Profiles)
+
+
+# In[34]:
+
+
+AI_Adv_Get(ThisAd2,KeyWordsDict,Profiles)
+
+
+# In[21]:
+
+
+Profiles
+
+
+# In[ ]:
+
+
+
+

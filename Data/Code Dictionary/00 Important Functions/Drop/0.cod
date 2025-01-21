@@ -1,0 +1,5 @@
+def Drop(feature) :
+    global data
+    data.drop([feature],axis=1, inplace=True)
+    data.head()
+

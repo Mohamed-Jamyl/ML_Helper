@@ -1,0 +1,21 @@
+while True : 
+    try : 
+        n = input("Number?")
+        n = int(n)
+        print(n*5)
+        break
+    except   :
+        print ("wrong format")
+        break
+    finally : 
+        print ("end")
+
+------------------------------------------
+
+z = input ('number ? ')
+
+try:
+    x = 1 / int(z)
+    print(x)
+except ZeroDivisionError as err:
+    print("Error message is:", err)

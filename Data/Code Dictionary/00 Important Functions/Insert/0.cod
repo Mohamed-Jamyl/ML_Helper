@@ -1,0 +1,3 @@
+def Insert(feature,lst) :
+    global data
+    data.insert(data.shape[1],feature,lst)

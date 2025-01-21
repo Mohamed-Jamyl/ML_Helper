@@ -1,0 +1,14 @@
+# !pip install geopy
+
+from geopy.geocoders import Nominatim
+geolocator = Nominatim(user_agent="catuserbot")
+def GeoLocate(country):
+    try:
+        loc = geolocator.geocode(country)
+        return (loc.latitude, loc.longitude)
+    except:
+        return np.nan
+
+
+GeoLocate('paris')
+

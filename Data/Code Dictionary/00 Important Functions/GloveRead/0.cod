@@ -1,0 +1,24 @@
+import io
+def load_vectors(fname,length = 10000):
+    fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
+    n, d = map(int, fin.readline().split())
+    data = {}
+    i=0
+    for line in fin:
+        i+=1
+        tokens = line.rstrip().split()
+        data[tokens[0]] = tokens[1:]
+        if i == length : 
+            break
+    return data
+ArabicEmbedding = load_vectors(r'E:\Machine Learning\NLP\0 Data\cc.ar.300.vec')
+
+
+list(ArabicEmbedding.keys())[:10]
+
+
+# ['-', '|', '.', ':', '،', 'في', '</s>', 'من', "'", 'على', ',', '(', ')', '/', 'و', 'أن', 'إلى', '"', 'عن', 'منتدى', '*', 'هذا', 'لا', 'الله', 'ما', 'أو', 'مع', 'التي', '؟', '%', '!', 'هذه', '»', '1', ']', '[', 'هو', 'كل', 'قسم', 'الذي', 'بعد', 'كان', '#', '2', 'المنتدى', 'عدد', 'بين', 'بن', '2017', 'ان']
+
+
+
+ArabicEmbedding['في']

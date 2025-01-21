@@ -1,0 +1,26 @@
+# !pip install folium
+
+import folium
+from folium.plugins import MarkerCluster
+
+world_map= folium.Map(tiles="cartodbpositron")
+marker_cluster = MarkerCluster().add_to(world_map)
+for i in tqdm(range(0,data.shape[0],50)):
+        lat = data.iloc[i]['Latt']
+        long = data.iloc[i]['Long']
+        radius=5
+        popup_text = "Country : {}<br> With Quantity : {}<br>"
+        popup_text = popup_text.format(data.iloc[i]['Country'],data.iloc[i]['Quantity'])
+        folium.CircleMarker(
+            location = [lat, long], radius=radius,popup= popup_text,fill =True).add_to(marker_cluster)
+
+
+world_map
+
+##############################################
+
+def InteractiveMap(Cor,Z=5) : 
+    m = folium.Map(location=[40.9316608,-101.5886191],zoom_start=Z)
+    for i in range(0,len(Cor)) : 
+        folium.Marker(location=[Cor[i][0],Cor[i][1]]).add_to(m)
+    return m   

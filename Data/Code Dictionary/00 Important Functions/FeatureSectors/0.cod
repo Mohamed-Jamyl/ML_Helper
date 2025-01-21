@@ -1,0 +1,28 @@
+def FeatureSectors(feature, new_feature , maxx):
+    global data
+    step = (maxx- data[feature].min())/10
+    new_list = []
+    minn = data[feature].min()
+    for x in range(data.shape[0]) : 
+        if data[feature][x] <= (minn + step):
+            new_list.append(1)
+        elif data[feature][x] <= (minn + (2*step)):
+            new_list.append(2)            
+        elif data[feature][x] <= (minn + (3*step)):
+            new_list.append(3)            
+        elif data[feature][x] <= (minn + (4*step)):
+            new_list.append(4)            
+        elif data[feature][x] <= (minn + (5*step)):
+            new_list.append(5)            
+        elif data[feature][x] <= (minn + (6*step)):
+            new_list.append(6)            
+        elif data[feature][x] <= (minn + (7*step)):
+            new_list.append(7)            
+        elif data[feature][x] <= (minn + (8*step)):
+            new_list.append(8)            
+        elif data[feature][x] <= (minn + (9*step)):
+            new_list.append(9)            
+        else:
+            new_list.append(10)            
+    data.insert(data.shape[1], new_feature , new_list)
+    data.head()

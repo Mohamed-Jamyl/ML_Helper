@@ -1,0 +1,13 @@
+xx = 5
+def gg() : 
+    xx = 14
+gg()
+print (xx)
+------------------------------------------
+xx = 5
+
+def gg() : 
+    global xx
+    xx = 14
+ gg()
+print (xx)

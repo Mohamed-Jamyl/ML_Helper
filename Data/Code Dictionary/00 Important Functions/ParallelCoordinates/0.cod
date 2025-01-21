@@ -1,0 +1,13 @@
+import plotly.express as px
+import plotly.io as pio
+pio.renderers.default = 'iframe'
+
+
+
+
+fig = px.parallel_coordinates(data,color="Area",labels = {'ISI':'ISI','Temp':'Temp','RelHumidity':'RelHumidity',
+                                                         'Wind':'Wind','Rain':'Rain','Area': 'Area','Fire': 'Fire'},
+                             color_continuous_scale=px.colors.diverging.Tealrose)
+
+fig.update_layout(coloraxis_showscale=True)
+fig.show()

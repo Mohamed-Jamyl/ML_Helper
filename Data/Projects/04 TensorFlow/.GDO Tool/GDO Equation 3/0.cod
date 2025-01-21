@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+import tensorflow as tf
+
+
+# In[2]:
+
+
+#  X = [0,1,2,3,4,5]
+#  y = [9,7,5,3,1,-1]
+
+
+w = tf.Variable([5.0],tf.float32)
+b = tf.Variable([7.0],tf.float32)
+
+x = tf.placeholder(tf.float32)
+
+LinearRegressionModel = w*x + b
+
+
+# In[3]:
+
+
+sess = tf.Session()
+
+sess.run(tf.global_variables_initializer())
+
+print(sess.run(LinearRegressionModel,{x:[0,1,2,3,4,5]}))
+
+y = tf.placeholder(tf.float32)
+
+
+# In[4]:
+
+
+SquaredDiff = tf.square(LinearRegressionModel -y )
+
+TotalLoss = tf.reduce_sum(SquaredDiff)
+    
+print (sess.run(TotalLoss , {x:[0,1,2,3,4,5] , y:[9,7,5,3,1,-1]}) )
+
+
+# In[5]:
+
+
+GDO  = tf.train.GradientDescentOptimizer(0.01)
+
+model = GDO.minimize(TotalLoss)
+
+
+# In[6]:
+
+
+for i in range(10000) : 
+    sess.run(model , {x:[0,1,2,3,4,5] , y:[9,7,5,3,1,-1]})
+    
+print(sess.run([w,b]))
+
+
+# In[ ]:
+
+
+
+

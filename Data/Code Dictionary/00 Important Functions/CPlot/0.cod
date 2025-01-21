@@ -1,0 +1,33 @@
+def CPlot(feature) : 
+    global data
+    fig, ax = plt.subplots(figsize=(10,6))
+    sns.countplot(x=feature, data=data,facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3))
+
+
+############################################
+
+def SelectedFeatureCPlot(feature,selected_feature) : 
+    global data
+    fig, ax = plt.subplots(figsize=(15,6))
+    plt.subplot(1,2,1)
+    plt.title('Output 0')
+    sns.countplot(x=SelectedData(feature,0,0,selected_feature), data=data,facecolor=(0, 0, 0, 0),linewidth=5,
+                  edgecolor=sns.color_palette("dark", 3))
+
+    plt.subplot(1,2,2)
+    plt.title('Output 1')
+    sns.countplot(x=SelectedData(feature,1,0,selected_feature), data=data,facecolor=(0, 0, 0, 0),linewidth=5,
+                  edgecolor=sns.color_palette("dark", 3) )  
+
+SelectedFeatureCPlot('OUTPUT ','Speed Limit')
+
+
+###################################################
+
+
+N = 0
+fig, ax = plt.subplots(figsize=(10,20))
+for i in range(10) : 
+    N+=1
+    plt.subplot(5,2,N)
+    sns.countplot(x=Features[N-1], data=data,facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3))

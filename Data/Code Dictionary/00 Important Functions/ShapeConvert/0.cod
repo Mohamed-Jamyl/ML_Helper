@@ -1,0 +1,23 @@
+DataPath = ''
+for folder in os.listdir(DataPath)[:2] : 
+  SubFolder = os.path.join(DataPath,folder)
+  for NewFolder in os.listdir(SubFolder)[:2] : 
+    InternalFolder = os.path.join(SubFolder,NewFolder)
+    for file in os.listdir(InternalFolder) : 
+      if file == 'Joint_Positions.csv' : 
+        FeaturesData = pd.read_csv(os.path.join(InternalFolder,file),skiprows=0 , names=['F1','F2','F3'])
+        BigList = []
+        for i in range(FeaturesData.shape[0])[::25] : 
+          SmallList = []
+          for j in range(25) : 
+            SmallList.append(FeaturesData['F1'][i+j])
+            SmallList.append(FeaturesData['F2'][i+j])
+            SmallList.append(FeaturesData['F3'][i+j])
+          BigList.append(SmallList)
+          CombinedData = pd.DataFrame(BigList,columns=[f'F{k}' for k in range(1,76)])    
+        print(CombinedData.shape)
+      if file == 'Labels.csv' : 
+        LabelData = pd.read_csv(os.path.join(InternalFolder,file),skiprows=0 , names=['Label'])
+        print(LabelData.shape)
+
+      Data = pd.concat([CombinedData,LabelData],axis = 1)

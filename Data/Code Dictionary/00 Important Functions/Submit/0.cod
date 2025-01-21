@@ -1,0 +1,12 @@
+data = pd.read_csv('sample_submission.csv')  
+print(f'Test data Shape is {data.shape}')
+data.head()
+
+
+idd = data['id']
+FinalResults = pd.DataFrame(y_pred,columns= ['***'])
+FinalResults.insert(0,'id',idd)
+
+FinalResults.head()
+
+FinalResults.to_csv("sample_submission.csv",index=False)

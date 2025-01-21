@@ -1,0 +1,2 @@
+import re
+re.sub("\d+", "", 'abcd1234')  #remove all digits

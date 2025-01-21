@@ -1,0 +1,57 @@
+from sklearn.datasets import make_classification
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+import keras
+from keras.utils import np_utils
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+%matplotlib inline
+from sklearn.metrics import confusion_matrix , classification_report
+
+X, y = make_classification(n_samples = 100000, n_features = 50, shuffle = True)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=44, shuffle =True)
+
+y = np_utils.to_categorical(y)
+
+KerasModel = keras.models.Sequential([
+    keras.layers.Dense(128, activation = 'tanh'),   
+    keras.layers.Dropout(0.05),
+    keras.layers.Dense(64, activation = 'tanh'),   
+    keras.layers.Dropout(0.05),
+    keras.layers.Dense(2, activation = 'sigmoid'),
+    ])
+
+KerasModel.compile(optimizer ='adam',loss='binary_crossentropy',metrics=['accuracy'])
+
+history = KerasModel.fit(X, y,validation_data=(X,y),epochs=5,batch_size = 500)
+###################################################
+plt.subplots(figsize=(20,10))
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.legend()
+plt.show()
+###################################################
+plt.subplots(figsize=(20,10))
+plt.title('Loss / Mean Squared Error')
+plt.plot(history.history['loss'], label='train')
+plt.plot(history.history['val_loss'], label='Validation')
+plt.legend()
+plt.show()
+###################################################
+y_pred = KerasModel.predict(X_test)
+print('Predicted Value  is : ' , y_pred[:10])
+###################################################
+y_predicted = []
+for i in range(len(y_pred))  : 
+    y_predicted.append (np.argmax(y_pred[i]))
+y_predicted = pd.Series(y_predicted)    
+print(y_predicted)
+###################################################
+CM = confusion_matrix(y_test, pd.Series(y_predicted))
+print('Confusion Matrix is : \n', CM)
+###################################################
+ClassificationReport = classification_report(y_test, pd.Series(y_predicted))
+print('Classification Report is : ', ClassificationReport )
+###################################################

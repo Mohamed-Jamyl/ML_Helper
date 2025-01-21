@@ -1,0 +1,16 @@
+XFeature = data['']
+YFeature = data['']
+
+plt.figure(figsize=(15,5))
+sns.boxplot(y=YFeature ,x=XFeature ,data=data.sort_values(YFeature ,ascending=False))
+
+###############################################
+
+def BPlot(data,feature1,feature2 = None,hue = None) : 
+    fig, ax = plt.subplots(figsize=(10,6))
+    if feature2 ==  None and hue == None : 
+        sns.boxplot(data[feature1],width=0.3,color='r')
+    elif  feature2 !=  None and hue == None :
+        sns.boxplot(x = data[feature1],y=data[feature2],width=0.3,color='r')
+    elif  feature2 !=  None and hue != None :
+        sns.boxplot(x = data[feature1],y=data[feature2],hue=data[hue],width=0.3,color='r')

@@ -1,0 +1,6 @@
+BestModels = [RandomForestClassifierModel,XGBClassifierModel,GBCModel]
+AllPredictedValues = []
+for i,j,k,l in zip(BestModels[0].predict_proba(X_test),BestModels[1].predict_proba(X_test),BestModels[2].predict_proba(X_test),y_test) : 
+  ThisValue = int(1-np.round((float(i[0])+float(j[0])+float(k[0]))/3))
+  AllPredictedValues.append(ThisValue)
+  print(f'Predicted Value is : {ThisValue} and Actual is {l}')

@@ -1,0 +1,12 @@
+#import itertoos as it
+#dict(it.islice(WCD.items(), 20)) 
+WCD = dict()    
+def MakeCloud(text , title = 'Word Clouds' , w = 15 , h = 15):
+    global WCD
+    plt.figure(figsize=(w,h))
+    WC = WordCloud(background_color="white",stopwords=set(stopwords.words('english'))).generate("".join([i for i in text.str.lower()]))
+    WCD = WC.words_
+    plt.imshow(WC)
+    plt.axis("off")
+    plt.title(title)
+    plt.show()

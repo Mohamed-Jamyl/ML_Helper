@@ -1,0 +1,4 @@
+data.reset_index(inplace=True)
+if 'index' in data.columns : data.drop(['index'],axis=1,inplace=True)
+if 'Unnamed: 0' in data.columns : data.drop(['Unnamed: 0'],axis=1,inplace=True)
+data.head()

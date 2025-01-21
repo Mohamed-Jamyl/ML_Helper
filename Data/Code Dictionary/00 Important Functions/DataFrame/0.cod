@@ -1,0 +1,3 @@
+Features = [First,Second]
+Columns = ['','']
+Data = pd.DataFrame(Features ,index =Columns).T

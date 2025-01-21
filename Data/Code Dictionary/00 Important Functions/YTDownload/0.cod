@@ -1,0 +1,220 @@
+#pip install youtube_dl
+
+import pytube,youtube_dl
+from pytube import Playlist,YouTube
+Link = 'https://www.youtube.com/playlist?list=PLo0NdDBVizFFkjKw7zwGzu9aDrL1pUJjq'
+
+Videos = []
+for video_url in Playlist(Link).video_urls:
+    Videos.append(video_url)
+print(len(Videos))
+
+n=0
+Missed = []
+for j in Videos : 
+    n+=1
+    print(f'For Video No : {n}')
+    url = j
+    ydl_opts = {}
+    try : 
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([j])
+    except : 
+        Missed.append(j)
+        pass
+
+
+###########################################################################
+
+# YT AUDIO
+
+import youtube_dl
+from pytube import Playlist
+
+# Years = {'Nahya':'https://www.youtube.com/playlist?list=PL5A1F9E625A6DB3B0',
+#          'Khelafa':'https://www.youtube.com/playlist?list=PLSVWH21xe617GaGYEFmEYY3XGLYBiR-ZO'}
+Years = {'Khelafa':'https://www.youtube.com/playlist?list=PLSVWH21xe617GaGYEFmEYY3XGLYBiR-ZO'}
+
+def Download(Years,N) : 
+    
+    def VD(video_url):
+        video_info = youtube_dl.YoutubeDL().extract_info(url = video_url,download=False)
+        filename = f"{video_info['title']}.mp3"
+        options={'format':'bestaudio/best','keepvideo':False,'outtmpl':filename}
+        with youtube_dl.YoutubeDL(options) as ydl:
+            ydl.download([video_info['webpage_url']])
+
+    YearsLinks = {}
+    for y in Years.keys() : 
+        playlist = Playlist(Years[y])
+        print('Number of videos in playlist: %s' % len(playlist.video_urls))
+        YearsLinks[y] = []
+        for video_url in playlist.video_urls:
+            YearsLinks[y].append(video_url)
+        print('-------------------------')    
+        
+    Missed = []
+    for Key in YearsLinks.keys() : 
+        print(f'For Playlist {Key}')
+        print('--------------------------')
+        n=0
+        for Video in YearsLinks[Key][N:] : 
+            n+=1
+            print(f'For Video No : {n}')
+            try : 
+                VD(Video)
+            except : 
+                Missed.append(Video)
+                pass        
+    return YearsLinks,Missed
+Download(Years,0)        
+############################################################
+
+
+
+############################################################
+
+
+
+############################################################
+
+
+
+
+
+############################################################
+
+
+ 
+
+
+import pytube
+from pytube import Playlist
+
+from pytube import YouTube
+import youtube_dl
+
+
+# In[ ]:
+
+
+
+
+
+# In[2]:
+
+
+Years = {'2016':'https://www.youtube.com/playlist?list=PLHiAH3-ZiltTLsb4nhZn5lGVgUcw-GByP',
+         '2017':'https://www.youtube.com/playlist?list=PLHiAH3-ZiltRQqDcpV_i3NF0unheSy4EJ',
+         '2018':'https://www.youtube.com/playlist?list=PLHiAH3-ZiltRrtzD7fPAxexr1qxrvyKyd',
+         '2019':'https://www.youtube.com/playlist?list=PLHiAH3-ZiltQL4Ug7lg4iqIKkHpVY0_Ix',
+         '2020':'https://www.youtube.com/playlist?list=PLHiAH3-ZiltQA2NLMuwDrofMO4reQlz43',
+         '2021':'https://www.youtube.com/playlist?list=PLHiAH3-ZiltRSqctvLIcX_mi2IrNifN5B'}
+
+
+# In[3]:
+
+
+YearsLinks = {}
+
+for y in Years.keys() : 
+    playlist = Playlist(Years[y])
+#     print('Number of videos in playlist: %s' % len(playlist.video_urls))
+    YearsLinks[y] = []
+    for video_url in playlist.video_urls:
+        YearsLinks[y].append(video_url)
+    print('-------------------------')
+
+
+# In[4]:
+
+
+for y in Years.keys() : 
+    playlist = Playlist(Years[y])
+    print('Number of videos in playlist: %s' % len(playlist.video_urls))
+
+
+# In[ ]:
+
+
+sum([len(YearsLinks[str(i)]) for i in range(2016,2022)])
+
+
+# In[ ]:
+
+
+i =  '2017'
+Missed = []
+print(f'For Year {i}')
+print('--------------------------')
+n=0
+for j in YearsLinks[str(i)] : 
+    n+=1
+    print(f'For Video No : {n}')
+    url = j
+    ydl_opts = {}
+    try : 
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([j])
+    except : 
+        Missed.append(j)
+        pass
+
+
+# In[ ]:
+
+
+
+
+
+# In[16]:
+
+
+YearsLinks['2018'].extend(['.' for i in range(17)])
+
+
+# In[5]:
+
+
+len(YearsLinks['2020'])
+
+
+# In[6]:
+
+
+for i in range (4) : 
+    file  = open(str(i)+'.txt','a')
+    for j in range(20*i,(1+i)*20) : 
+        file.write(YearsLinks['2020'][j])
+        file.write('\n')
+    file.close()
+
+
+# In[22]:
+
+
+YearsLinks['2019'][180],YearsLinks['2019'][181],YearsLinks['2019'][182]
+
+
+# In[ ]:
+
+
+i =  '2016'
+print(f'For Year {i}')
+print('--------------------------')
+n=0
+for j in YearsLinks[str(i)] : 
+    n+=1
+    print(f'For Video No : {n}')
+    url = j
+    video = YouTube(url)
+    video.streams.all()
+    video.streams.get_by_itag(18).download()
+    
+
+
+# In[ ]:
+
+
+
+

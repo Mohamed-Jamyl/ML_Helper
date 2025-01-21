@@ -1,0 +1,24 @@
+def SelectedWords(data) : 
+     common = CommonWords(data['filtered comments'],False,25)
+     print('start converting')
+     for i in range(data.shape[0]) : 
+         phrase = ''
+         for word in data['filtered comments'][i].split() :
+             if word in common : 
+                 phrase += str(' ' + word)
+         data['selected words'][i] = phrase
+         if i%10 ==0 : 
+             print(f'{i} items done')
+
+-----------------------------------------
+
+def SelectedWords(data , this_list) : 
+     for item in this_list : 
+         this_data = SelectedData(data ,item , 0.01 , 1 , 'filtered comments')
+         common = CommonWords(this_data,False, 25)
+         for i in  list(SelectedData(data ,item , 0.01 , 1 , 'filtered comments').index) : 
+             for word in data['filtered comments'][i].split() :
+                  if word in common : 
+                     data['selected words'][i] =  data['selected words'][i] + ' ' + word
+         print(f'{item} done')
+        

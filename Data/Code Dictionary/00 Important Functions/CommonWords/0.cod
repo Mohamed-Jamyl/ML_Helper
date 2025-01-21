@@ -1,0 +1,20 @@
+def CommonWords(text ,show = True , kk=10) : 
+    all_words = []
+
+    for i in range(text.shape[0]) : 
+        this_phrase = list(text)[i]
+        for word in this_phrase.split() : 
+            all_words.append(word)
+    common_words = collections.Counter(all_words).most_common()
+    k=0
+    word_list =[]
+    for word, i in common_words : 
+        if not word.lower() in  nlp.Defaults.stop_words :
+            if show : 
+                print(f'The word is   {word}   repeated   {i}  times')
+            word_list.append(word)
+            k+=1
+        if k==kk : 
+            break
+            
+    return word_list

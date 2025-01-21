@@ -1,0 +1,443 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
+import pandas as pd
+import glob as gb
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+data = pd.DataFrame()
+
+
+# In[ ]:
+
+
+case = ''
+p0 = '''
+شكرا لاستخدام متصفح الرد الذكي لعوانة , نتمني أن نراكم قريبا . .  
+'''
+p1 = '''
+مرحبا بكم في متصفح الرد الذكي لعوانة . . 
+
+من فضلك اكتب رقم 1 لاستعراض اسماء الأمراض
+او رقم 2 للبحث بكلمة محددة
+و يمكنك كتابة رقم 0 في أي وقت للإنتهاء
+'''
+
+p2 = '''
+لدينا عدد من أمراض النخيل وهي : 
+'''
+
+p3 = '''
+ من فضلك قم بكتابة رقم المرض المطلوب لاستعراض تفاصيل أكثر عنه
+'''
+
+p4 = '''
+من فضلك أدخل أحد كلمات البحث , مثل كلمة (سوس) او (عذوق)
+'''
+
+p5 = '''
+يمكنك استعراض مرض آخر عبر كتابة رقمه , او اكتب 500 للعودة للقائمة الرئيسية
+'''
+
+p6 = '''
+رقم غير صحيح , من فضلك اختر رقم 0 او 1 او 2 
+'''
+
+p7 = '''
+رقم غير صحيح , من فضلك اختر رقم أحد الأمراض الموجودة 
+'''
+
+p8 ='''
+من فضلك أدخل رقم صحيح
+'''
+
+p9 = '''
+من فضلك اكتب 1 لعرض نتائج الاسماء , او 2 لعرض النبذة , او 3 لعرض الأعراض , او 4 لعرض الأسباب , او 5 لعرض الحلول , او 6 لعرض الصور , كما يمكنك البحث عن كلمة أخري , او اكتب 500 للعودة للقائمة الرئيسية
+'''
+
+p10 = '''
+لا توجد قيم لعرضها
+'''
+
+
+# In[ ]:
+
+
+class ChatBot() : 
+    def Start() :
+        global data
+        import pandas as pd
+        ID,AD,ED,D1,D2,D3,D4,D5 = [],[],[],[],[],[],[],[]
+        case = 'start'
+        f= open('data//names.txt','r' , encoding="utf8")
+        nn = 0
+        for a in f:
+            if nn == 0 : 
+                ID.append(a.rstrip())
+                nn+=1
+            elif nn==1 : 
+                AD.append(a.rstrip())
+                nn+=1
+            elif nn == 2 :
+                ED.append(a.rstrip())
+                nn=0
+        for i in ID : 
+            X1,X2,X3,X4 = '','','',''
+            N1,N2,N3,N4 = 0,0,0,0
+            temp = []
+            f= open(str('data//' +i+'//0.txt'),'r',encoding="utf8")
+            NN = 0
+            for a in f:
+                temp.append(a.rstrip())
+                if len(a.rstrip()) == 1 and a.rstrip() == 'a' : N1 = NN
+                if len(a.rstrip()) == 1 and a.rstrip() == 'b' : N2 = NN
+                if len(a.rstrip()) == 1 and a.rstrip() == 'c' : N3 = NN
+                if len(a.rstrip()) == 1 and a.rstrip() == 'd' : N4 = NN                    
+                NN+=1    
+            for u in temp[N1+1:N2] : 
+                if not (u.strip() =='') : X1 = X1 + '\n' + u
+            for u in temp[N2+1:N3] : 
+                if not (u.strip() =='') : X2 = X2 + '\n' + u
+            for u in temp[N3+1:N4] : 
+                if not (u.strip() =='') : X3 = X3 + '\n' + u
+            for u in temp[N4+1:] : 
+                if not (u.strip() =='') : X4 = X4 + '\n' + u
+            D1.append(X1)
+            D2.append(X2)
+            D3.append(X3)
+            D4.append(X4)
+        def GetImages(n) :
+            a = gb.glob1(str('data\\' + str(n) + '\\') , '*.png' )
+            b = gb.glob1(str('data\\' + str(n) + '\\') , '*.jpg' )
+            a.extend(b)
+            AllText = ''
+            for x in a : 
+                    AllText+= ('\n' + x)
+            return AllText
+    
+    
+        data = pd.concat([pd.Series(ID),pd.Series(AD),pd.Series(ED),pd.Series(D1)
+                          ,pd.Series(D2),pd.Series(D3),pd.Series(D4)],axis=1)
+        data = data.rename(columns={0:"ID",1: "arabic_name", 2:"english_name",
+                                   3:'about',4:'syndrome',5:'reasons',6:'healing'})
+        data['Images'] = data['ID'].apply(GetImages)
+        def Input() : 
+            while True : 
+                try : 
+                    i = input()  
+                    i = int(i)
+                    break
+                except : 
+                    print(p8)
+            return i
+        
+        def ShowList(l) : 
+            if len(l) == 0 : 
+                print(p10)
+            else :    
+                for a,b in enumerate(l) : 
+                    print('----------------')
+                    print(f' العنصر رقم  {a+1}  هو :')
+                    print(f'---> {b}')
+                    
+                print('*******************************')
+            
+        print(p1)
+        i = Input()
+        while True : 
+            if i == 0 :     
+                    print(p0)
+                    break
+            elif case == 'start' : 
+                if not(int(i) in [0,1,2]) : 
+                    print(p6)
+                    i = Input()
+                if i == 1 : 
+                    print(p2)
+                    print('---------------------------------')
+                    for i in range(data.shape[0]) : 
+                        print(f'مرض رقم {data["ID"][i]}  و اسمه بالعربية  :  {data["arabic_name"][i]}  و اسمه بالإنجليزية  {data["english_name"][i]}')
+                    print('---------------------------------')
+                    print(p3)
+                    case = 'diseases show'
+                    i = Input()
+                elif i == 2 :     
+                    case = 'diseases search'
+                    print(p4)
+                    i = input()
+
+            elif case == 'diseases show' : 
+                if not(int(i) in range(data.shape[0]+1)) and not int(i) == 500 : 
+                    print(p7)
+                    i = Input()
+                else : 
+                    i = int(i) - 1
+                    print(f'المرض باللغة العربية   :  {data.iloc[i,1]}')
+                    print(f'المرض باللغة الإنجليزية   :  {data.iloc[i,2]}')
+                    if len(str(data.iloc[i,3]).strip()) > 0 : 
+                        print()
+                        print('عن المرض : ')
+                        print(data.iloc[i,3])
+                        print('----------------------------------------------')
+                    if len(str(data.iloc[i,4]).strip()) > 0 : 
+                        print()
+                        print('الأعراض  : ')
+                        print(data.iloc[i,4])
+                        print('----------------------------------------------')
+                    if len(str(data.iloc[i,5]).strip()) > 0 : 
+                        print()
+                        print('الأسباب : ')
+                        print(data.iloc[i,5])
+                        print('----------------------------------------------')
+                    if len(str(data.iloc[i,6]).strip()) > 0 : 
+                        print()
+                        print('طرق العلاج  : ')
+                        print(data.iloc[i,6])
+                        print('----------------------------------------------')
+                    if len(str(data.iloc[i,7]).strip()) > 0 : 
+                        print()
+                        print('الصور  : ')
+                        for k in ((data.iloc[i,7]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                j = (str('data\\' + str(i+1)  + '\\' + k))
+                                plt.figure(figsize=(20,10))
+                                plt.axis('off')
+                                plt.imshow(mpimg.imread(j))
+                                plt.show()   
+                    print('====================================================')
+                    print(p5)
+                    i = Input()
+                    if int(i) ==500: 
+                        print(p1)
+                        i = Input()
+                        case = 'start'
+                    elif int(i)== 0 : 
+                        print(p0)
+                        break
+                    else : 
+                        case == 'diseases show'
+            elif case == 'diseases search' :                 
+                SW = i.strip()
+                S1,S2,S3,S4,S5,S6 = [],[],[],[],[],[]
+
+                for x in range(data.shape[0]) : 
+                    if SW in str(data['arabic_name'][x]) :
+                        S1.append(str(data['arabic_name'][x]))
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+                                                
+                    if SW in str(data['english_name'][x]) :
+                        S1.append(str(data['english_name'][x]))                        
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+
+                    if SW in str(data['about'][x]) :
+                        S2.append(str(data['about'][x]))                        
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+                    
+                    if SW in str(data['syndrome'][x]) : 
+                        S3.append(str(data['syndrome'][x]))                                                
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+                    
+                    if SW in str(data['reasons'][x]) : 
+                        S4.append(str(data['reasons'][x]))                        
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+                    
+                    if SW in str(data['healing'][x]) : 
+                        S5.append(str(data['healing'][x]))                        
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+                
+                S6 = list(set(S6))
+                print(f'  نتائج البحث عن كلمة :  {SW}')
+                print(f'تم العثور علي :  {len(S1)} نتائج في الأسماء و   {len(S2)} نتائج في النبذة و  {len(S3)} نتائج في الأعراض و  {len(S4)} نتائج في الأسباب و  {len(S5)} نتائج في الحلول و   {len(S6)} نتائج في الصور ')        
+                print(p9)
+                i = input()
+                if i =='500': 
+                    print(p1)
+                    i = Input()
+                    case = 'start'
+                elif i== '0' : 
+                    print(p0)
+                    break
+                elif i=='1' : 
+                    print('أسماء الأمراض هي : ')
+                    ShowList(S1)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+                        
+                elif i=='2' : 
+                    print('النبذات هي هي : ')
+                    ShowList(S2)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                    
+                elif i=='3' : 
+                    print('الأعراض هي : ')
+                    ShowList(S3)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                    
+                elif i=='4' : 
+                    print('الأسباب هي : ')
+                    ShowList(S4)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                    
+                elif i =='5' : 
+                    print('الحلول هي : ')
+                    ShowList(S5)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                elif i =='6' : 
+                    print('الصور هي : ')
+                    for k in S6 : 
+                        if len(k) > 0 : 
+                            plt.figure(figsize=(20,10))
+                            plt.axis('off')
+                            plt.imshow(mpimg.imread(k))
+                            plt.show()   
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                    
+                else : 
+                    case == 'diseases search'
+                    
+            elif case == 'more search' :                 
+
+                if i =='500': 
+                    print(p1)
+                    i = Input()
+                    case = 'start'
+                elif i== '0' : 
+                    print(p0)
+                    break
+                elif i=='1' : 
+                    print('أسماء الأمراض هي : ')
+                    ShowList(S1)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                    
+                elif i=='2' : 
+                    print('النبذات هي هي : ')
+                    ShowList(S2)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                    
+                elif i=='3' : 
+                    print('الأعراض هي : ')
+                    ShowList(S3)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                elif i=='4' : 
+                    print('الأسباب هي : ')
+                    ShowList(S4)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                elif i =='5' : 
+                    print('الحلول هي : ')
+                    ShowList(S5)
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                elif i =='6' : 
+                    print('الصور هي : ')
+                    for k in S6 : 
+                        if len(k) > 0 : 
+                            plt.figure(figsize=(20,10))
+                            plt.axis('off')
+                            plt.imshow(mpimg.imread(k))
+                            plt.show()   
+                    print('--------------------------------')
+                    print(p9)
+                    i = input()
+                    if i in ['1','2','3','4','5','6'] : 
+                        case = 'more search'
+                    else : 
+                        case = 'diseases search'
+
+                else : 
+                    case == 'diseases search'                
+                
+
+ 
+
+X = ChatBot
+X.Start()
+ 

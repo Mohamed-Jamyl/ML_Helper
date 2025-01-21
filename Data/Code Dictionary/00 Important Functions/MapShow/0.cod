@@ -1,0 +1,46 @@
+GovnamesLocations = {
+    'Baghdad':[1720,1440],
+    'Qadisiyah':[1900,1900],
+    'Babylon':[1800,1700],
+    'Karbala':[1560,1720],
+    'Salahaddin':[1400,1000],
+    'Kirkuk':[1650,750],
+    'Nineveh':[1100,600],
+    'Najaf':[1500,2180],
+    'Anbar':[900,1550],
+    'Basra':[2600,2400],
+    'DhiQar':[2220,2100],
+    'Muthanna':[2000,2500],
+    'Diyala':[1940,1280],
+    'Wasit':[2110,1600],
+    'Maysan':[2500,1900]}
+    
+
+GovnamesTotalCrimes     = 
+{'Baghdad': 159475,
+ 'Qadisiyah': 34642,
+ 'Babylon': 32418,
+ 'Karbala': 16148,
+ 'Salahaddin': 20409,
+ 'Kirkuk': 29615,
+ 'Nineveh': 24061,
+ 'Najaf': 64467,
+ 'Anbar': 8059,
+ 'Basra': 104397,
+ 'DhiQar': 28003,
+ 'Muthanna': 21700,
+ 'Diyala': 34990,
+ 'Wasit': 42874,
+ 'Maysan': 20756}
+
+
+plt.figure(figsize = (20,20))
+plt.title('Governrates Crimes Rate')
+im = plt.imread('iraq.png')
+implot = plt.imshow(im)
+
+for k in GovnamesLocations.keys() : 
+    plt.scatter(x=int(GovnamesLocations[k][0]), y=int(GovnamesLocations[k][1]),c='b',
+                s=0.08*int(GovnamesTotalCrimes[k]),alpha = 0.75) 
+    plt.text(int(GovnamesLocations[k][0]),int(GovnamesLocations[k][1]),str(k+'\n'+str(GovnamesTotalCrimes[k])),             horizontalalignment='center',verticalalignment='center',fontsize=12)
+plt.show()

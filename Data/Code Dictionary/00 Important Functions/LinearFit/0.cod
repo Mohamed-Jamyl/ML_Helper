@@ -1,0 +1,45 @@
+def FitData() :
+    global u
+    plt.figure(figsize = (15, 7))
+    plt.title(f'Crime : ({data.iloc[u,3]}) at City: ({data.iloc[u,1]})')
+    plt.xlabel('Quarters')
+    plt.ylabel('Value')
+    OriginalX = range(44)
+    ExtendedX = range(64)
+    plt.scatter(OriginalX,data.iloc[u,4:-1].values.tolist(),c='g')
+    m, b = np.polyfit(np.array(OriginalX), np.array(data.iloc[u,4:-1].values.tolist()), 1)
+    plt.scatter(range(44,64),AvoidNegative(m*range(44,64)+b),c='blue')
+    plt.plot(ExtendedX, (m*ExtendedX + b),c='r')
+    print(f'Predicted Values for Linear Model is {[int(np.round(i)) for i in AvoidNegative(m*range(44,64)+b)]}')
+    Diff = [abs(i-j)/max(i+0.01,j) for i in  data.iloc[u,4:-1].values.tolist() for j  in (m*OriginalX+b)]
+    DD = (sum(Diff)/len(Diff))    
+    if DD<1 : 
+        print(f'Linear Model Accuracy is {int((1-DD)*100)}%')
+    else : 
+        print(f'Linear Model Accuracy is 0%')
+
+    print('------------------------------')
+    w,e,r = np.polyfit(np.array(OriginalX), np.array(data.iloc[u,4:-1].values.tolist()), 2)
+    plt.scatter(range(44,64),AvoidNegative((w*np.array([i**2 for i in range(44,64)]))+e*range(44,64) + r),c='purple')
+    print(f'Predicted Values for Quadratic Model is {[int(np.round(i)) for i in AvoidNegative((w*np.array([i**2 for i in range(44,64)]))+e*range(44,64) + r)]}')
+    plt.plot(ExtendedX, ((w*np.array([i**2 for i in ExtendedX]))+e*ExtendedX  + r),c='orange')
+    Diff = [abs(i-j)/max(i+0.01,j) 
+            for i in data.iloc[u,4:-1].values.tolist() 
+            for j in (w*np.array([i**2 for i in OriginalX])+e*OriginalX+r)]
+    DD = (sum(Diff)/len(Diff))
+    if DD<1 : 
+        print(f'Linear Model Accuracy is {int((1-DD)*100)}%')
+    else : 
+        print(f'Linear Model Accuracy is 0%')
+
+
+#     z,w,e,r = np.polyfit(np.array(OriginalX), np.array(data.iloc[u,4:-1].values.tolist()), 3)
+#     plt.scatter(range(44,64),AvoidNegative((z*np.array([i**3 for i in range(44,64)]))
+#                               +(w*np.array([i**2 for i in range(44,64)]))+e*range(44,64) + r),c='black')
+#     plt.plot(ExtendedX, ((z*np.array([i**3 for i in ExtendedX]))
+#                          +(w*np.array([i**2 for i in ExtendedX]))+e*ExtendedX  + r),c='gray')
+
+    
+    plt.xticks(ExtendedX,Quarters, rotation ='vertical')
+    plt.show()
+    u+=1

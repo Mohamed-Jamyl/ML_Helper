@@ -1,0 +1,15 @@
+import random 
+from sklearn.cluster import KMeans
+
+
+InertiaDict = {}
+M = 0
+for j in range(2,5) :
+    for i in range(10) : 
+        M+=1
+        Columns = random.sample(set(data.columns),j)
+        KMeansModel = KMeans(n_clusters=3,max_iter=1000,verbose=0,random_state=33)
+        KMeansModel.fit(data[Columns])
+        InertiaValue = KMeansModel.inertia_/1000000
+        InertiaDict[M] = [InertiaValue,Columns]
+        print(f'for Columns {Columns} intertia is : {InertiaValue}')   

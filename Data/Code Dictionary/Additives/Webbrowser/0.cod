@@ -1,0 +1,3 @@
+webbrowser
+import webbrowser as w
+w.open('www.fb.com') 

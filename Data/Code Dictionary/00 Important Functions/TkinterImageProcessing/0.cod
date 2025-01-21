@@ -1,0 +1,866 @@
+from tkinter import ttk ,messagebox ,filedialog
+import tkinter as t 
+from tkinter.scrolledtext import ScrolledText
+from IPython.display import clear_output
+import glob as gb
+from PIL import Image, ImageTk
+import numpy as np
+import pandas as pd
+import random,torch,torchvision,datetime,os,cv2
+from matplotlib import pyplot as plt
+%matplotlib inline
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
+from matplotlib.figure import Figure 
+from collections import Counter
+import torch.nn.functional as nnf
+from pydicom import dcmread
+
+
+
+
+ThisWidth = 1200
+ThisHeight = 400
+TotalImages = 0
+Selected_Folder,Selected_Model = '',''
+
+master = t.Tk()
+# master.wm_iconbitmap('Logo.ico')
+master.geometry(f'{ThisWidth}x{ThisHeight}')
+master.update_idletasks()
+win_width = master.winfo_width() + 2 * (master.winfo_rootx() - master.winfo_x())
+win_height = master.winfo_height() + (master.winfo_rooty() - master.winfo_y()) + (master.winfo_rootx() - master.winfo_x())
+master.geometry(f'{master.winfo_width()}x{master.winfo_height()}+{master.winfo_screenwidth()//2-win_width//2}+{master.winfo_screenheight()//2-win_height//2}')
+Path = ''
+
+######################################################
+def ExitProgram() : 
+    global master
+    master.destroy()
+    return None
+
+
+
+def CheckData() :
+    global Path
+    Path = DataPathText.get().strip()
+    
+    if len (Path) == 0 : 
+        messagebox.showinfo("Error", f'Data Path is invalid')
+    elif not os.path.exists(Path) : 
+        messagebox.showinfo("Error", f'Data Path Folder is not exists')
+    elif not os.path.exists(os.path.join(Path,'Benign')) : 
+        messagebox.showinfo("Error", f'Benign Data Folder is not exists')
+    elif not os.path.exists(os.path.join(Path,'Cancer')) : 
+        messagebox.showinfo("Error", f'Cancer Data Folder is not exists')
+    elif not os.path.exists(os.path.join(Path,'Normal')) : 
+        messagebox.showinfo("Error", f'Normal Data Folder is not exists')
+    else : 
+        NImages1 = gb.glob1(os.path.join(Path,'Benign') , '*.jpg' )
+        NImages2 = gb.glob1(os.path.join(Path,'Benign') , '*.png' )
+        CImages1 = gb.glob1(os.path.join(Path,'Normal') , '*.jpg' )
+        CImages2 = gb.glob1(os.path.join(Path,'Normal') , '*.png' )
+        VImages1 = gb.glob1(os.path.join(Path,'Cancer') , '*.jpg' )
+        VImages2 = gb.glob1(os.path.join(Path,'Cancer') , '*.png' )
+  
+        ThisPath1 = os.path.join(Path,'Normal')
+        ThisImage1=os.path.join(ThisPath1,np.random.choice(os.listdir(ThisPath1)))
+        im1 = Image.open(ThisImage1)
+        im1.thumbnail((200,200), Image.ANTIALIAS)
+        image1 = ImageTk.PhotoImage(im1)
+        Imagelabel1.configure(image=image1)
+        Imagelabel1.image = image1
+        ImageTitle1.config(text=str(len(CImages1)+len(CImages2))+ '  Normal Sample')
+        ImageTitle1.update_idletasks()
+
+        ThisPath2  = os.path.join(Path,'Cancer')
+        ThisImage2=os.path.join(ThisPath2,np.random.choice(os.listdir(ThisPath2)))
+        im2 = Image.open(ThisImage2)
+        im2.thumbnail((200,200), Image.ANTIALIAS)
+        image2 = ImageTk.PhotoImage(im2)
+        Imagelabel2.configure(image=image2)
+        Imagelabel2.image = image2
+        ImageTitle2.config(text=str(len(NImages1)+len(NImages2)) + '  Cancer Sample')
+        ImageTitle2.update_idletasks()
+
+        ThisPath3  = os.path.join(Path,'Benign')
+        ThisImage3=os.path.join(ThisPath3,np.random.choice(os.listdir(ThisPath3)))
+        im3 = Image.open(ThisImage3)
+        im3.thumbnail((200,200), Image.ANTIALIAS)
+        image3 = ImageTk.PhotoImage(im3)
+        Imagelabel3.configure(image=image3)
+        Imagelabel3.image = image3
+        ImageTitle3.config(text=str(len(VImages1)+len(VImages2)) + '  Benign Sample')
+        ImageTitle3.update_idletasks()
+       
+        TrainingButton["state"] = "active"
+        FoldersButton["state"] = "active"
+
+    return None
+
+class ImageProcessing(torch.utils.data.Dataset):
+    def __init__(self, ImageLocation, TransformerOfPicture):
+        
+        def ImageFinder(SelectedClass):
+            global TotalImages
+            AllImages = [im for im in os.listdir(ImageLocation[SelectedClass]) ]
+            
+            self.Values.append(len(AllImages)) 
+            TotalImages +=len(AllImages)
+            
+            return AllImages
+        
+        self.AllImages = {}
+        self.Classes = ['Normal', 'Benign', 'Cancer']
+        self.Values = []
+        
+        for Class in self.Classes:
+            self.AllImages[Class] = ImageFinder(Class)
+            
+        self.ImageLocation = ImageLocation
+        self.TransformerOfPicture = TransformerOfPicture
+        
+    def __len__(self):
+        return sum([len(self.AllImages[ThisClass]) for ThisClass in self.Classes])
+    
+    
+    def __getitem__(self, index):
+        ThisClass = random.choice(self.Classes)
+        index = index % len(self.AllImages[ThisClass])
+        ImageName = self.AllImages[ThisClass][index]
+        ImagePath = os.path.join(self.ImageLocation[ThisClass], ImageName)
+        SelectedImage = Image.open(ImagePath).convert('RGB')
+        return self.TransformerOfPicture(SelectedImage), self.Classes.index(ThisClass)
+
+
+
+
+def LoadData(Data,TrainingNumber,TestingNumber,BatchSize): 
+    global TrainLen , TestLen
+    TrainingData, TestingData = torch.utils.data.random_split(Data,[TrainingNumber,TestingNumber])
+    TrainLen , TestLen = len(TrainingData),len(TestingData)
+    TrainingLoadedData ,TestingLoadedData = torch.utils.data.DataLoader(TrainingData,batch_size = BatchSize),torch.utils.data.DataLoader(TestingData,batch_size=BatchSize)
+    return TrainingLoadedData ,TestingLoadedData
+
+
+class ImageTestProcessing(torch.utils.data.Dataset):
+    def __init__(self, ImageLocation, TransformerOfPicture):
+        def ImageFinder():
+            global TotalImages
+            AllImages = [im for im in os.listdir(ImageLocation) ]
+            TotalImages =len(AllImages)
+            return AllImages
+       
+        self.AllImages = [] 
+        self.AllImages = ImageFinder()
+        self.ImageLocation = ImageLocation
+        self.TransformerOfPicture = TransformerOfPicture
+        
+    def __len__(self):
+        return len(self.AllImages)
+    
+    def __getitem__(self, index):
+        index = index % len(self.AllImages)
+        ImageName = self.AllImages[index]
+        ImagePath = os.path.join(self.ImageLocation, ImageName)
+        SelectedImage = Image.open(ImagePath).convert('RGB')
+        return self.TransformerOfPicture(SelectedImage)
+
+
+def LoadTestData(Data,BatchSize): 
+    LoadedData = torch.utils.data.DataLoader(Data,batch_size = BatchSize)
+    return LoadedData 
+
+
+
+def BuildingModel():
+    global SelectedModel,SelectedLossFunction ,SelectedOptimizer
+    SelectedModel = torchvision.models.resnet18(pretrained=True)
+    SelectedModel.fc = torch.nn.Linear(in_features=512, out_features=3)
+    SelectedLossFunction = torch.nn.CrossEntropyLoss()
+    SelectedOptimizer = torch.optim.Adam(SelectedModel.parameters(), lr=0.00001)
+    return SelectedModel
+
+def CalculateAccuracy(Labels,Output) :
+    _,Preds = torch.max(Output, 1)
+    return sum((Preds == Labels).numpy())
+   
+def TrainTheModel() : 
+    global TotalImages,Epochs,SelectedModel,SelectedOptimizer,SelectedLossFunction,TrainLen , TestLen
+    Now = datetime.datetime.now()
+    FileName = f'{Now.year}_{Now.month}_{Now.day}_{Now.hour}_{Now.minute}'
+    ThisFolder = os.path.join(Path,FileName)
+    os.makedirs(ThisFolder)
+
+    Epochs = EpochText.get().strip()
+    if not  Epochs.isdigit() : 
+        messagebox.showinfo("Info", 'Please Specific valid number of Epochs')
+        return None
+    if int(Epochs) <=0 : 
+        messagebox.showinfo("Info", 'Please Specific valid number of Epochs')
+        return None
+    SelectedTransformer = torchvision.transforms.Compose([torchvision.transforms.Resize(size=(75,200)),torchvision.transforms.RandomHorizontalFlip(),
+                                                 torchvision.transforms.ToTensor()])
+    TotalImages=0
+    SelectedModel,SelectedLossFunction,SelectedOptimizer,TrainLen,TestLen = None,None,None,0,0
+     
+    TypesLocations = {}
+    AllClasses = ['Normal', 'Benign', 'Cancer']
+    for Class in AllClasses : 
+        TypesLocations[Class] = os.path.join(Path,Class)
+        
+        
+    ProcessedImages = ImageProcessing(TypesLocations, SelectedTransformer)
+    SplittingRatio = 0.7
+    TrainingLoadedData ,TestingLoadedData =  LoadData(ProcessedImages,
+                                                      int(np.round(SplittingRatio*TotalImages)),
+                                                      int(np.round((1-SplittingRatio)*TotalImages)),
+                                                      20)
+
+    BuildingModel()
+    
+    TrAc,TsAc,TrLs,TsLs = [],[],[],[]
+    for j in range(int(Epochs)):
+        TrainLoss,TestLoss,TrainAccuracy,TestAccuracy  = 0,0,0,0
+        SelectedModel.train()
+        i=0
+        for X,y in TrainingLoadedData:
+            i+=1
+            SelectedOptimizer.zero_grad()
+            ThisOutput = SelectedModel(X)
+            ThisLoss = SelectedLossFunction(ThisOutput,y)
+            ThisLoss.backward()
+            SelectedOptimizer.step()
+            TrainLoss += ThisLoss.item()
+            TrainAccuracy += CalculateAccuracy(y,ThisOutput)
+        TrainLoss /=i
+        TrainAccuracy /=TrainLen
+        TrAc.append(TrainAccuracy)
+        TrLs.append(TrainLoss)
+        
+        
+        SelectedModel.eval()
+        i=0
+        for X,y in TestingLoadedData:
+            i+=1
+            ThisOutput = SelectedModel(X)
+            ThisLoss = SelectedLossFunction(ThisOutput,y)
+            TestLoss += ThisLoss.item()
+            TestAccuracy += CalculateAccuracy(y,ThisOutput)
+        TestLoss/=i
+        TestAccuracy /=TestLen
+        TsAc.append(TestAccuracy)
+        TsLs.append(TestLoss)
+        
+        fig = Figure(figsize=(5,1.9)) 
+        
+        XValue = [k for k in range(j+1)]
+        fig.add_subplot(121).plot(XValue,TrAc,label='Train Acc')
+        fig.add_subplot(121).plot(XValue,TsAc,label='Test Acc')
+        fig.add_subplot(122).plot(XValue,TrLs,label='Train Loss')
+        fig.add_subplot(122).plot(XValue,TsLs,label='Test Loss')
+        fig.legend(prop={'size':7})
+        fig.patch.set_facecolor('#E0E0E0') 
+        fig.patch.set_alpha(0.7) 
+        canvas = FigureCanvasTkAgg(fig, master=ChartFrame)  
+        canvas.draw()
+        canvas.get_tk_widget().pack(side=t.BOTTOM, expand=True, fill=t.X) 
+        ChartFrame.update()
+        master.update_idletasks()
+        
+        Result =f'For Epoch Number {j+1}\n'
+        Result +='-------------------\n'
+        Result +=f'Train Loss is {np.round(TrainLoss,2)} \nTrain Accuracy is {np.round(TrainAccuracy,2)} \n'
+        Result +=f'Test Loss is {np.round(TestLoss,2)} \nTest Accuracy is {np.round(TestAccuracy,2)}'
+
+        AccLabel.config(text=Result )
+        AccLabel.update_idletasks()
+        plt.subplot(1,2,1)
+        plt.plot(XValue,TrAc,label='Train Acc')
+        plt.plot(XValue,TsAc,label='Test Acc')
+        plt.subplot(1,2,2)
+        plt.plot(XValue,TrLs,label='Train Loss')
+        plt.plot(XValue,TsLs,label='Test Loss')
+        plt.legend(prop={'size':7})
+        plt.savefig(os.path.join(ThisFolder,f"Chart {j+1}.png"))
+  
+        torch.save(SelectedModel.state_dict(), os.path.join(ThisFolder,f"Model {j+1}.h5"))
+    return None
+
+def CheckFolders() : 
+    global Path, Selected_Folder
+    FoldersList.delete(0,t.END)
+    ModelsList.delete(0,t.END)
+    Selected_Folder,Selected_Model = '', ''
+    for F in os.listdir(Path) : 
+        if F[:4].isdigit() : 
+            FoldersList.insert(0, F)
+    return None
+
+def CheckModels(Folder) : 
+    global Selected_Model
+    ModelsList.delete(0,t.END)
+    Selected_Model = ''
+    for Model in  os.listdir(os.path.join(Path,Folder)) : 
+        if Model[-2:] == 'h5' : 
+            ModelsList.insert(0,Model)
+    return None            
+
+def SelectFolderFunction(event):
+    global Selected_Folder
+    selection = event.widget.curselection()
+    if selection:
+        index = selection[0]
+        ThisFolder = event.widget.get(index)
+        CheckModels(ThisFolder)
+        Selected_Folder = ThisFolder
+    return None
+
+
+def SelectModelFunction(event):
+    global Selected_Model
+    MTestButton["state"] = "active"
+    STestButton["state"] = "active"
+    selection = event.widget.curselection()
+    if selection:
+        index = selection[0]
+        ThisModel = event.widget.get(index)
+        Selected_Model = ThisModel
+    return None
+
+def SeparatingTesting() : 
+    global Path,Selected_Folder,Selected_Model 
+    if Selected_Folder == '' : 
+        messagebox.showinfo("Error", 'Please Select Folder First !')
+        return None
+    elif Selected_Model  == '' : 
+        messagebox.showinfo("Error", 'Please Select Model First !')
+        return None
+    else  : 
+        SelectedFolderHere = filedialog.askdirectory(initialdir =  os.getcwd(),
+                                                     title = "Select the Images Folder")
+        if len(SelectedFolderHere) == 0 : 
+            messagebox.showinfo("Error", 'Please Select the Images Folder !')
+            return None
+ 
+        
+        W,H = 1000,2000
+        NotFound = False
+        if FlipVar.get() ==1 : 
+            Flip = True
+        else:
+            Flip = False
+            
+        
+
+        for folder in os.listdir(SelectedFolderHere) : 
+            if OptionVar.get() == 0 : 
+                ThisPhoto = 'jpg'
+            elif OptionVar.get() == 1 : 
+                ThisPhoto = 'png'
+            elif OptionVar.get() == 2 : 
+                ThisPhoto = 'dcm'
+                
+            Images = [os.path.join(SelectedFolderHere,folder,'1.'+ThisPhoto),os.path.join(SelectedFolderHere,folder,'2.'+ThisPhoto),
+                  os.path.join(SelectedFolderHere,folder,'3.'+ThisPhoto) , os.path.join(SelectedFolderHere,folder,'4.'+ThisPhoto)]
+
+            
+            if folder[0] != '_' : 
+                for image in Images : 
+                    if not os.path.isfile(image) : 
+                        messagebox.showinfo("Error", f'file ({image}) not found, please check you data')
+                        NotFound = True
+                        return None
+
+        if not NotFound : 
+            Now = datetime.datetime.now()
+            FileName = f'{Now.year}_{Now.month}_{Now.day}_{Now.hour}_{Now.minute}_{Now.second}'
+            NPath = os.path.join(SelectedFolderHere,'_'+FileName)
+            os.mkdir(NPath)
+            AllFolders = []
+
+            for folder in os.listdir(SelectedFolderHere) : 
+                if folder[0] != '_' :  AllFolders.append(folder)
+            
+
+            i=0
+            for folder in AllFolders : 
+                i+=1
+                Images = [os.path.join(SelectedFolderHere,folder,'1.'+ThisPhoto),
+                          os.path.join(SelectedFolderHere,folder,'2.'+ThisPhoto),
+                          os.path.join(SelectedFolderHere,folder,'3.'+ThisPhoto),
+                          os.path.join(SelectedFolderHere,folder,'4.'+ThisPhoto)]
+                ProcessingLabel.config(text= f'Processing : {i} of {len(AllFolders)} Folders')
+                ProcessingLabel.update()
+                
+                if ThisPhoto == 'dcm' : 
+                    
+                    ds = dcmread(os.path.join(SelectedFolderHere,folder,Images[1]))
+                    ds.PhotometricInterpretation = 'YBR_FULL'
+                    image1 = ds.pixel_array 
+                    ds = dcmread(os.path.join(SelectedFolderHere,folder,Images[0]))
+                    ds.PhotometricInterpretation = 'YBR_FULL'
+                    image2 = ds.pixel_array
+                    ds = dcmread(os.path.join(SelectedFolderHere,folder,Images[3]))
+                    ds.PhotometricInterpretation = 'YBR_FULL'
+                    image3 = ds.pixel_array
+                    ds.PhotometricInterpretation = 'YBR_FULL'
+                    ds = dcmread(os.path.join(SelectedFolderHere,folder,Images[2]))
+                    image4 = ds.pixel_array
+
+                            
+
+                else : 
+                    
+                    image1 = cv2.imread((os.path.join(SelectedFolderHere,folder,Images[1])),cv2.IMREAD_GRAYSCALE)
+                    image2 = cv2.imread((os.path.join(SelectedFolderHere,folder,Images[0])),cv2.IMREAD_GRAYSCALE)
+                    image3 = cv2.imread((os.path.join(SelectedFolderHere,folder,Images[3])),cv2.IMREAD_GRAYSCALE)
+                    image4 = cv2.imread((os.path.join(SelectedFolderHere,folder,Images[2])),cv2.IMREAD_GRAYSCALE)
+                    
+
+                
+                image1 = cv2.resize(image1,(W,H), interpolation = cv2.INTER_AREA)
+                image2 = cv2.resize(image2,(W,H), interpolation = cv2.INTER_AREA)
+                image3 = cv2.resize(image3,(W,H), interpolation = cv2.INTER_AREA)
+                image4 = cv2.resize(image4,(W,H), interpolation = cv2.INTER_AREA)
+
+                if Flip : image1 = cv2.flip(image1, 1)  
+                if Flip : image2 = cv2.flip(image2, 1)  
+                if Flip : image3 = cv2.flip(image3, 1)  
+                if Flip : image4 = cv2.flip(image4, 1)      
+
+                cv2.imwrite( os.path.join(NPath,folder+'.png'),
+                            cv2.vconcat([cv2.hconcat([image1, image2]),
+                                         cv2.hconcat([image3, image4])]))   
+        
+        ProcessingLabel.config(text= f'Finished Processing Images')
+        ProcessingLabel.update()
+        
+        SelectedFolderHere  = NPath
+        TheseImages = [im for im in os.listdir(SelectedFolderHere) if im[-3:].lower() in ['png','jpg','jpeg']]
+
+        if len(TheseImages) == 0 : 
+            messagebox.showinfo("Error", 'No Images Exists !')
+            return None
+
+        ProcessingLabel.config(text= f'Found {len(TheseImages)} Images')
+        ProcessingLabel.update()
+     
+
+        ModelToTest = os.path.join(Path,Selected_Folder,Selected_Model)
+        SelectedTransformer = torchvision.transforms.Compose([torchvision.transforms.Resize(size=(75,200)),torchvision.transforms.RandomHorizontalFlip(),
+                                                 torchvision.transforms.ToTensor()])
+        AllClasses = ['Normal', 'Benign', 'Cancer']
+       
+        ProcessedImages = ImageTestProcessing(SelectedFolderHere,SelectedTransformer)
+        
+
+        LoadedData =  LoadTestData(ProcessedImages,20)
+        SelectedModel = torch.load(ModelToTest)
+        i=0
+        Now = datetime.datetime.now()
+        ResultFile = f'{Now.year}_{Now.month}_{Now.day}_{Now.hour}_{Now.minute}'
+
+        file1 = open(os.path.join(Path,Selected_Folder,f'result_{ResultFile}.txt'),"a")
+        AllPrediction = []
+        for images in LoadedData:
+            master.update_idletasks()
+            outputs = SelectedModel(images)
+            Probs = nnf.softmax(outputs, dim=1)
+            _, preds = torch.max(outputs, 1)
+            ii=0
+            for a in preds :
+                ii+=1
+                i+=1
+                k = int(100*(i)/len(TheseImages))
+                ProcessingLabel.config(text= f'Processing : {k}%')
+                ProcessingLabel.update()
+                master.update_idletasks()
+                ThisText = f'Predicted value for item {TheseImages[i-1]} is : ({AllClasses[int(a)]}) \n'
+                ThisText += f'Probs:     {np.round(100*(Probs[ii-1][0].item()))}% Normal,   {np.round(100*(Probs[ii-1][1].item()))}% Benign,    {np.round(100*(Probs[ii-1][2].item()))}% Cancer \n\n' 
+                
+                ResultText.insert(t.END, ThisText)
+                AllPrediction.append(AllClasses[int(a)])
+                ResultText.update()
+                file1.write(ThisText)
+                PDict = dict(Counter(AllPrediction))
+                if len(PDict) ==1 : 
+                    ThisResult = f'Type {list(PDict.keys())[0]} found {list(PDict.values())[0]} images'
+                elif len(PDict) ==2 : 
+                    ThisResult = f'Type {list(PDict.keys())[0]} found {list(PDict.values())[0]} images, Type {list(PDict.keys())[1]} found {list(PDict.values())[1]} images'
+                elif len(PDict) ==3 : 
+                    ThisResult = f'Type {list(PDict.keys())[0]} found {list(PDict.values())[0]} images, Type {list(PDict.keys())[1]} found {list(PDict.values())[1]} images, Type {list(PDict.keys())[2]} found {list(PDict.values())[2]} images'
+                    
+                ResultLabel.config(text= ThisResult)
+                ResultLabel.update()
+                master.update_idletasks()
+        file1.write('\n')
+        file1.write('\n')
+        file1.write('\n===================================================\n\n')
+        file1.write(ThisResult)
+        file1.close()
+        os.startfile(os.path.join(Path,Selected_Folder)) 
+
+    
+
+    return None
+
+
+def MergedTesting() : 
+    global Path,Selected_Folder,Selected_Model
+    if Selected_Folder == '' : 
+        messagebox.showinfo("Error", 'Please Select Folder First !')
+        return None
+    elif Selected_Model  == '' : 
+        messagebox.showinfo("Error", 'Please Select Model First !')
+        return None
+    else  : 
+        SelectedFolderHere = filedialog.askdirectory(initialdir =  os.getcwd(),
+                                                     title = "Select the Images Folder")
+        if len(SelectedFolderHere) == 0 : 
+            messagebox.showinfo("Error", 'Please Select the Images Folder !')
+            return None
+        
+        TheseImages = [im for im in os.listdir(SelectedFolderHere) if im[-3:].lower() in ['png','jpg','jpeg']]
+
+        if len(TheseImages) == 0 : 
+            messagebox.showinfo("Error", 'No Images Exists !')
+            return None
+
+        ProcessingLabel.config(text= f'Found {len(TheseImages)} Images')
+        ProcessingLabel.update()
+     
+
+        ModelToTest = os.path.join(Path,Selected_Folder,Selected_Model)
+        SelectedTransformer = torchvision.transforms.Compose([torchvision.transforms.Resize(size=(75,200)),torchvision.transforms.RandomHorizontalFlip(),
+                                                 torchvision.transforms.ToTensor()])
+        AllClasses = ['Normal', 'Benign', 'Cancer']
+       
+        ProcessedImages = ImageTestProcessing(SelectedFolderHere,SelectedTransformer)
+        
+
+        LoadedData =  LoadTestData(ProcessedImages,20)
+        SelectedModel = torch.load(ModelToTest)
+        i=0
+        Now = datetime.datetime.now()
+        ResultFile = f'{Now.year}_{Now.month}_{Now.day}_{Now.hour}_{Now.minute}'
+
+        file1 = open(os.path.join(Path,Selected_Folder,f'result_{ResultFile}.txt'),"a")
+        AllPrediction = []
+        for images in LoadedData:
+            master.update_idletasks()
+            outputs = SelectedModel(images)
+            Probs = nnf.softmax(outputs, dim=1)
+            _, preds = torch.max(outputs, 1)
+            ii=0
+            for a in preds :
+                i+=1
+                ii+=1
+                k = int(100*(i)/len(TheseImages))
+                ProcessingLabel.config(text= f'Processing : {k}%')
+                ProcessingLabel.update()
+                master.update_idletasks()
+                ThisText = f'Predicted value for item {TheseImages[i-1]} is : ({AllClasses[int(a)]}) \n'
+                ThisText += f'Probs:     {np.round(100*(Probs[ii-1][0].item()))}% Normal,   {np.round(100*(Probs[ii-1][1].item()))}% Benign,    {np.round(100*(Probs[ii-1][2].item()))}% Cancer \n\n' 
+
+                ResultText.insert(t.END,ThisText)
+                AllPrediction.append(AllClasses[int(a)])
+                ResultText.update()
+                file1.write(ThisText)
+                PDict = dict(Counter(AllPrediction))
+                if len(PDict) ==1 : 
+                    ThisResult = f'Type {list(PDict.keys())[0]} found {list(PDict.values())[0]} images'
+                elif len(PDict) ==2 : 
+                    ThisResult = f'Type {list(PDict.keys())[0]} found {list(PDict.values())[0]} images, Type {list(PDict.keys())[1]} found {list(PDict.values())[1]} images'
+                elif len(PDict) ==3 : 
+                    ThisResult = f'Type {list(PDict.keys())[0]} found {list(PDict.values())[0]} images, Type {list(PDict.keys())[1]} found {list(PDict.values())[1]} images, Type {list(PDict.keys())[2]} found {list(PDict.values())[2]} images'
+                    
+                ResultLabel.config(text= ThisResult)
+                ResultLabel.update()
+                master.update_idletasks()
+        file1.write('\n')
+        file1.write('\n')
+        file1.write('\n===================================================\n\n')
+        file1.write(ThisResult)
+        file1.close()
+        os.startfile(os.path.join(Path,Selected_Folder)) 
+
+    
+
+    return None
+
+######################################################
+
+
+
+TrainFrame=t.LabelFrame(master,text='Training',width=600,height =390)
+TrainFrame.place(relx=0.005, rely=0.005)
+
+TestFrame=t.LabelFrame(master,text='Testing',width=580,height =390)
+TestFrame.place(relx=0.51, rely=0.005)
+
+ExitButton=t.Button(TestFrame,text='Exit',width=10,height=1,command=ExitProgram)
+ExitButton.place(relx=0.855, rely=0.91)
+
+DataPathLabel = t.Label(TrainFrame,text='Data Path :',width=8,height=1)
+DataPathLabel.place(relx=0.01, rely=0.01)
+
+DataPathText=t.Entry(TrainFrame)
+DataPathText.place(relx=0.12, rely=0.01,width=220,height=25)
+DataPathText.insert(0,r'C:\Users\Admin#\Desktop\Cancer')
+
+CheckButton=t.Button(TrainFrame,text='Show Images',width=10,height=1,command=CheckData)
+CheckButton.place(relx=0.52, rely=0.01)
+
+
+ImageTitle1 = t.Label(TrainFrame,text='..',width=15,height=1,fg = 'green')
+ImageTitle1.place(relx=0.07, rely=0.1)
+ImageTitle2 = t.Label(TrainFrame,text = '..',width=15,height=1,fg = 'green')
+ImageTitle2.place(relx=0.4, rely=0.1)
+ImageTitle3 = t.Label(TrainFrame,text='..',width=15,height=1,fg = 'green')
+ImageTitle3.place(relx=0.732, rely=0.1)
+
+
+ThisSize = 150
+Imagelabel1 = t.Label(TrainFrame,width=ThisSize,height=ThisSize)
+Imagelabel1.place(relx=0.03, rely=0.17)
+Imagelabel2 = t.Label(TrainFrame,width=ThisSize,height=ThisSize)
+Imagelabel2.place(relx=0.37, rely=0.17)
+Imagelabel3 = t.Label(TrainFrame,width=ThisSize,height=ThisSize)
+Imagelabel3.place(relx=0.7, rely=0.17)
+
+
+ChartFrame=t.LabelFrame(TrainFrame,width=375,height =127)
+ChartFrame.place(relx=0.35, rely=0.62)
+
+
+TrainingButton=t.Button(TrainFrame,text='Train Model',width=12,height=1,command=TrainTheModel)
+TrainingButton.place(relx=0.01, rely=0.6)
+TrainingButton["state"] = "disabled"
+
+
+EpochLabel = t.Label(TrainFrame,text='Epochs : ',width=8,height=1)
+EpochLabel.place(relx=0.18, rely=0.609)
+
+EpochText=t.Entry(TrainFrame)
+EpochText.place(relx=0.28, rely=0.615,width=30,height=18)
+EpochText.insert(0,'30')
+
+
+AccLabel = t.Label(TrainFrame,width=19,height=6,justify=t.LEFT)
+AccLabel.place(relx=0.001, rely=0.68)
+
+
+
+FoldersButton=t.Button(TestFrame,text='Folders',width=5,height=1,command=CheckFolders)
+FoldersButton.place(relx=0.01, rely=0.01)
+# FoldersButton["state"] = "disabled"
+    
+FoldersFrame = t.Frame(TestFrame)
+FoldersFrame.place(relx=0.09, rely=0.010)
+
+FoldersList = t.Listbox(FoldersFrame, width=16, height=4)
+FoldersList.pack(side="left", fill="y")
+
+FoldersScrollbar = t.Scrollbar(FoldersFrame, orient="vertical")
+FoldersScrollbar.config(command=FoldersList.yview)
+FoldersScrollbar.pack(side="right", fill="y")
+
+FoldersList.config(yscrollcommand=FoldersScrollbar.set)
+FoldersList.bind("<<ListboxSelect>>", SelectFolderFunction)
+
+
+ModelsFrame = t.Frame(TestFrame)
+ModelsFrame.place(relx=0.3, rely=0.010)
+
+ModelsList = t.Listbox(ModelsFrame, width=16, height=4)
+ModelsList.pack(side="left", fill="y")
+
+
+
+ModelsScrollbar = t.Scrollbar(ModelsFrame, orient="vertical")
+ModelsScrollbar.config(command=ModelsList.yview)
+ModelsScrollbar.pack(side="right", fill="y")
+
+ModelsList.config(yscrollcommand=ModelsScrollbar.set)
+ModelsList.bind("<<ListboxSelect>>", SelectModelFunction)
+
+
+MTestButton=t.Button(TestFrame,text='Merged Testing',width=13,height=1,command=MergedTesting)
+MTestButton.place(relx=0.51, rely=0.01)
+MTestButton["state"] = "disabled"
+
+
+STestButton=t.Button(TestFrame,text='Separated Testing',width=13,height=1,command=SeparatingTesting)
+STestButton.place(relx=0.71, rely=0.01)
+STestButton["state"] = "disabled"
+
+FlipVar = t.IntVar()
+FlipVar.set(1)
+
+
+FlipCheckBox = t.Checkbutton(master, text='Flip',variable=FlipVar, onvalue=1, offvalue=0)
+FlipCheckBox.place(relx=0.94, rely=0.06)
+
+
+OptionVar = t.IntVar()
+
+
+JPGOption =  t.Radiobutton(master,text="jpg", variable=OptionVar, value=0)
+JPGOption.place(relx=0.86, rely=0.14)
+
+PNGOption =  t.Radiobutton(master,text="png", variable=OptionVar, value=1)
+PNGOption.place(relx=0.90, rely=0.14)
+
+DCMOption =  t.Radiobutton(master,text="dcm", variable=OptionVar, value=2)
+DCMOption.place(relx=0.94, rely=0.14)
+
+
+
+ResultText=ScrolledText(TestFrame,font =('bold', 9))
+ResultText.place(relx=0.01, rely=0.2615,width=560,height=150)
+
+ResultLabel = t.Label(TestFrame,text='',width=80,height=2,justify=t.LEFT, anchor='w',fg='green')
+ResultLabel.place(relx=0.01, rely=0.68)
+
+
+ProcessingLabel = t.Label(TestFrame,text='--',width=35,height=2,justify=t.LEFT, anchor='w',fg='red')
+ProcessingLabel.place(relx=0.52, rely=0.10)
+
+
+CreditLabel = t.Label(TestFrame,text='All rights reserved @Mostafa Majid 2021',width=30,height=2,justify=t.LEFT)
+CreditLabel.place(relx=0.012, rely=0.90)
+Path = DataPathText.get().strip()
+master.update()
+master.title('Cancer Breast Detector')
+
+master.deiconify()
+master.focus()
+master.mainloop()
+
+
+
+##############################################
+
+
+from tkinter import ttk,filedialog
+from tkinter.scrolledtext import ScrolledText
+import tkinter as t 
+import numpy as np
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set(style="whitegrid")
+import warnings
+warnings.filterwarnings("ignore")
+import os,time,datetime,itertools
+
+from PIL import Image
+import matplotlib.pyplot as plt
+%matplotlib inline
+import os,shutil,random,torch,torchvision
+
+
+######################################################
+ThisWidth = 800
+ThisHeight =300
+
+
+master = t.Tk()
+# master.wm_iconbitmap('icon.ico')
+master.geometry(f'{ThisWidth}x{ThisHeight}')
+master.update_idletasks()
+win_width = master.winfo_width() + 2 * (master.winfo_rootx() - master.winfo_x())
+win_height = master.winfo_height() + (master.winfo_rooty() - master.winfo_y()) + (master.winfo_rootx() - master.winfo_x())
+master.geometry(f'{master.winfo_width()}x{master.winfo_height()}+{master.winfo_screenwidth()//2-win_width//2}+{master.winfo_screenheight()//2-win_height//2}')
+
+def Test(Images,ThisClasses,ModelToTest,Multi,ImagesName = None,ImageWidth=50,ImageHeight=50) : 
+    class ImageTestProcessing(torch.utils.data.Dataset):
+        def __init__(self, ImageLocation, TransformerOfPicture):
+            self.AllImages = ImageLocation
+            self.ImageLocation = ImageLocation
+            self.TransformerOfPicture = TransformerOfPicture
+        def __len__(self):
+            return len(self.AllImages)
+        def __getitem__(self, index):
+            index = index % len(self.AllImages)
+            ImagePath = self.AllImages[index]
+            SelectedImage = Image.open(ImagePath).convert('RGB')
+            return self.TransformerOfPicture(SelectedImage)
+    def LoadTestData(Data,BatchSize): 
+        LoadedData = torch.utils.data.DataLoader(Data,batch_size = BatchSize)
+        return LoadedData 
+    SelectedTransformer = torchvision.transforms.Compose([torchvision.transforms.Resize(size=(ImageWidth,ImageHeight)),torchvision.transforms.RandomHorizontalFlip(),torchvision.transforms.ToTensor()])
+    ProcessedImages = ImageTestProcessing(Images, SelectedTransformer)
+    LoadedData =  LoadTestData(ProcessedImages,1)
+    SelectedModel = torch.load(ModelToTest)
+    i=0
+
+    for  images in LoadedData:
+        outputs = SelectedModel(images)
+        _, preds = torch.max(outputs, 1)
+        if not Multi : 
+            if int(preds[0]) == 0 :
+                ResultLabel.config(text= f'Predicted valus for the image is ({ThisClasses[int(preds[0])]})',fg='red')
+            else : 
+                ResultLabel.config(text= f'Predicted valus for the image is ({ThisClasses[int(preds[0])]})',fg='green')            
+            ResultLabel.update()
+        else  : 
+            for b in preds :
+                i+=1
+                ResultText.insert(t.END, f'Image ({ImagesName[i]}) is predicted as : ({ThisClasses[int(b)]})\n')
+                ResultText.update()
+        return None
+    return None
+
+      
+def TestOneImage() : 
+    ThisFile = filedialog.askopenfilename(parent=master,
+                                    initialdir=os.getcwd(),
+                                    title="Please Select The Image :",
+                                    filetypes=[('JPG', '.jpg'), ('PNG', '.png')])
+    if len(ThisFile) > 1 : 
+        if os.path.exists(ThisFile) : 
+            Test(Images=[ThisFile],ThisClasses= ['Diseased','Healthy'],ModelToTest = 'SavedModel.h5',Multi=False)
+            
+
+OneImageButton=t.Button(master,text='Test Image',width=12,height=1,command=TestOneImage)
+OneImageButton.place(relx=0.02, rely=0.05)
+
+
+def TestSeveralImages() : 
+    ThisFolder = filedialog.askdirectory(initialdir =  os.getcwd(),title = "Select the Images Folder")
+    if len(ThisFolder) > 1 : 
+        ImagesName = [im for im in os.listdir(ThisFolder) if str(im[-3:]).lower() in ['png','jpg']]
+        Images = [os.path.join(ThisFolder,im) for im in os.listdir(ThisFolder) if str(im[-3:]).lower() in ['png','jpg']]
+        ResultText.delete('1.0', t.END)
+        Test(Images=Images,ThisClasses= ['Diseased','Healthy'],ModelToTest = 'SavedModel.h5',Multi=True,ImagesName=ImagesName)
+
+         
+SeveralImagesButton=t.Button(master,text='Test Folder',width=12,height=1,command=TestSeveralImages)
+SeveralImagesButton.place(relx=0.02, rely=0.2)
+
+
+ResultText=ScrolledText(master,font =('bold', 9))
+ResultText.place(relx=0.2, rely=0.2,width=560,height=220)
+
+
+def ExitProgram() : 
+    global master
+    master.destroy()
+    return None
+
+ExitButton=t.Button(master,text='Exit',width=12,height=2,command=ExitProgram)
+ExitButton.place(relx=0.02, rely=0.82)
+
+
+ResultLabel = t.Label(master,text='',width=100,height=1,anchor="w")
+ResultLabel.place(relx=0.2, rely=0.05)
+
+
+######################################################
+master.update()
+master.title('Mango Disease Detector')
+
+master.deiconify()
+master.focus()
+master.mainloop()

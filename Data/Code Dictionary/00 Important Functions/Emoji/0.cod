@@ -1,0 +1,3 @@
+!pip install emoji
+import emoji
+[i['emoji'] for i in emoji.emoji_list(' 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🥸 🤩 🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 😖 😫 😩 🥺')]

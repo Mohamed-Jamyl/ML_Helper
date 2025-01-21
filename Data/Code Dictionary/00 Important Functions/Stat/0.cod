@@ -1,0 +1,5 @@
+def Stat(feature) : 
+    global data
+    print(f'The Sum for {feature} is  : {data[feature].sum()}')
+    print(f'The Mean for {feature} is  : {data[feature].mean()}')
+    print(f'The Median for {feature} is  : {data[feature].median()}')

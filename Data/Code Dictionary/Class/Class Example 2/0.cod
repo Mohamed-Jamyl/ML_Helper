@@ -1,0 +1,34 @@
+class Person:
+    def __init__(self, name,mobile_phone=None, office_phone=None,private_phone=None, email=None):
+        self.name = name
+        self.mobile = mobile_phone
+        self.office = office_phone
+        self.private = private_phone
+        self.email = email
+    def add_mobile_phone(self, number):
+        self.mobile = number
+    def add_office_phone(self, number):
+        self.office = number
+    def add_private_phone(self, number):
+        self.private = number
+    def add_email(self, address):
+        self.email = address
+    def dump(self):
+        s = self.name + '\n'
+        if self.mobile is not None:
+            s += 'mobile phone: %s\n' % self.mobile
+        if self.office is not None:
+            s += 'office phone: %s\n' % self.office
+        if self.private is not None:
+            s += 'private phone: %s\n' % self.private
+        if self.email is not None:
+            s += 'email address: %s\n' % self.email
+        print (s)
+
+p1 = Person('Hans Hanson',office_phone='767828283', email='h@hanshanson.com')
+p2 = Person('Ole Olsen', office_phone='767828292')
+p2.add_email('olsen@somemail.net')
+phone_book = [p1, p2]
+
+for person in phone_book:
+    person.dump()

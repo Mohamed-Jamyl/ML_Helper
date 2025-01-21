@@ -1,0 +1,2 @@
+import shutil as sh
+sh.copytree('D:\\1\\00' , 'D:\\1\\33')

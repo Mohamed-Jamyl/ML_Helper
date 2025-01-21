@@ -1,0 +1,22 @@
+if x != 5 :
+print ('hello')
+------------------------------------------
+if x != 5 :
+print ('hello')
+else :
+print ('no')
+------------------------------------------
+if x != 5 :
+print ('hello')
+elif x > 8 :
+print ('yes')
+else :
+print ('no')
+------------------------------------------
+if x != 5 : print ('hello')
+elif x > 8 : print ('yes')
+else :print ('no')
+------------------------------------------
+a,b = 11,10
+max = a if (a>b) else b
+print (max)

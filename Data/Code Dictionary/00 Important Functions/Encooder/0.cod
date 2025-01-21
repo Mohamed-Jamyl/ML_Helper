@@ -1,0 +1,18 @@
+from sklearn.preprocessing import LabelEncoder
+def Encoder(feature , new_feature, drop = True) : 
+    global data
+    enc  = LabelEncoder()
+    enc.fit(data[feature])
+    data[new_feature] = enc.transform(data[feature])
+    if drop == True : 
+        data.drop([feature],axis=1, inplace=True)
+
+
+############################################
+
+for col in data.columns : 
+  if data[col].dtypes =='object' : 
+    enc  = LabelEncoder()
+    enc.fit(data[col].astype(str))
+    data[f'{col}_'] = enc.transform(data[col].astype(str))
+    data.drop([col],axis=1, inplace=True)      

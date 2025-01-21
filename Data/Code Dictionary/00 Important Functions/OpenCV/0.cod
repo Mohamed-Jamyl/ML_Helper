@@ -1,0 +1,7 @@
+import cv2
+
+img=cv2.imread(Path)
+img=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+img=img.reshape((img.shape[1]*img.shape[0],3))
+
+

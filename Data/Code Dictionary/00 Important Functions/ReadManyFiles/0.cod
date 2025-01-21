@@ -1,0 +1,8 @@
+import pandas as pd
+import os
+data = pd.DataFrame()
+Path = r'Path'
+for File in os.listdir(Path) : 
+    Data = pd.read_excel(os.path.join(Path,File))
+    data = pd.concat([data,Data])
+    print(data.shape)

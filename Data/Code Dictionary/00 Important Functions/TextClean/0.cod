@@ -1,0 +1,6 @@
+def CleanText(text) : 
+  text = ' '.join([a.lower() for a in text.split() if a.lower() not in list(nlp.Defaults.stop_words)])
+  text = ' '.join([a for a in text.split() if a[0]!= '@'] )
+  text = ' '.join([a for a in text.split() if a[0]!= '#'] )
+  text = re.sub(r'[^\x00-\x7f]',r'', text)#= regex.sub(u'[^\p{Latin}]', u' ', text)
+  return text

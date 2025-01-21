@@ -1,0 +1,46 @@
+from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression,SGDClassifier
+from sklearn.naive_bayes import GaussianNB,MultinomialNB,BernoulliNB
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis,QuadraticDiscriminantAnalysis
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report
+
+###########################################
+
+GaussianNBModel = GaussianNB()
+MultinomialNBModel = MultinomialNB(alpha=1.0)
+BernoulliNBModel = BernoulliNB(alpha=1.0,binarize=1)
+LogisticRegressionModel = LogisticRegression(penalty='l2',solver='sag',C=1.0,random_state=33)
+SGDClassifierModel = SGDClassifier(penalty='l2',loss='squared_loss',learning_rate='optimal',random_state=33)
+RandomForestClassifierModel = RandomForestClassifier(criterion = 'gini',n_estimators=300,max_depth=7,random_state=33) 
+GBCModel = GradientBoostingClassifier(n_estimators=100,max_depth=3,random_state=33) 
+QDAModel = QuadraticDiscriminantAnalysis(tol=0.0001)
+SVCModel = SVC(kernel= 'rbf',max_iter=100,C=1.0,gamma='auto')
+DecisionTreeClassifierModel = DecisionTreeClassifier(criterion='gini',max_depth=3,random_state=33)
+KNNClassifierModel = KNeighborsClassifier(n_neighbors= 5,weights ='uniform',algorithm='auto') 
+
+Models = [GaussianNBModel,KNNClassifierModel,MultinomialNBModel,
+          BernoulliNBModel,LogisticRegressionModel,RandomForestClassifierModel,
+          GBCModel,SGDClassifierModel,QDAModel,SVCModel,DecisionTreeClassifierModel]
+
+
+###########################################
+
+
+ModelsScore = {}
+for Model in Models : 
+    print(f'for Model {str(Model).split("(")[0]}')
+    Model.fit(X_train, y_train)
+    print(f'Train Score is : {Model.score(X_train, y_train)}')
+    print(f'Test Score is : {Model.score(X_test, y_test)}')
+    y_pred = Model.predict(X_test)
+    ClassificationReport = classification_report(y_test,y_pred)
+    print('Classification Report is : \n', ClassificationReport )
+    print(f'Precision value is  : {ClassificationReport.split()[19]}')
+    print(f'Recall value is  : {ClassificationReport.split()[20]}')
+    print(f'F1 Score value is  : {ClassificationReport.split()[21]}')
+    ModelsScore[str(Model).split("(")[0]] = [ClassificationReport.split()[19],
+                                             ClassificationReport.split()[20],ClassificationReport.split()[21]]
+    print('=================================================')    

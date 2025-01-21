@@ -1,0 +1,10 @@
+def ShowClouds(this_list , n) : 
+    for item in this_list[n*3:(n*3)+3] : 
+        this_data =  SelectedData(data ,item , 0.1 , 1 , 'filtered comments')
+        print(f'for item    {item}')
+        print(f'Number of selected rows {this_data.shape[0]}')
+        print('common words : ')
+        _ = CommonWords(this_data)
+        if this_data.shape[0] >0 : 
+            MakeCloud(this_data , str(f'Word Cloud for {item}'), 8 ,8)
+        print('--------------------------')

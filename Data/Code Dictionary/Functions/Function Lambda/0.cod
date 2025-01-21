@@ -1,0 +1,9 @@
+powers = lambda x,y : x**y
+print (powers(5,3))
+------------------------------------------
+powers = [lambda x: 1,lambda x: x,lambda x: x**2,lambda x: x**3]
+
+print(powers[0](5))  
+print(powers[1](5))  
+print(powers[2](5))  
+print(powers[3](5))  

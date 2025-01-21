@@ -1,0 +1,16 @@
+def SACategories(n) : 
+  if n < -0.7 : 
+    return 'Very Negative'
+  elif  n < -0.3 : 
+    return 'Negative'
+  elif  n < 0 : 
+    return 'Weak Negative'
+  elif  n < 0.3 : 
+    return 'Weak Positive'
+  elif  n < 0.7 : 
+    return 'Positive'
+  else : 
+    return 'Very Positive'
+
+data['SA Cetgories']  = data['SA Compound'].apply(lambda x : SACategories(float(x)))
+data[['SA Compound','SA Cetgories']].head(30)

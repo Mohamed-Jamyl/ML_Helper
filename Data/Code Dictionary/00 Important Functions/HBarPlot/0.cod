@@ -1,0 +1,3 @@
+ThisData = pd.DataFrame([CategoriesDict.values(),CategoriesDict.keys()],index = ['Repeating','Categories']).T
+fig, ax = plt.subplots(figsize=(10,6))
+ax = sns.barplot(x='Repeating', y='Categories', data=ThisData)

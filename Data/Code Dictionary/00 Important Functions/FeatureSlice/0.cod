@@ -1,0 +1,2 @@
+def FeatureSlice(data,indices,number,output) : 
+    return pd.concat([data.iloc[:,indices[:number]] , data[output]] , axis = 1)

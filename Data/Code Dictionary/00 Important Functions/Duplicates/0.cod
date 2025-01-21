@@ -1,0 +1,11 @@
+DuplicateIndices = []
+for i,row in enumerate(data.duplicated().tolist()) : 
+    if row == True : DuplicateIndices.append(i)
+len(DuplicateIndices)
+
+############################################
+
+data.drop_duplicates(inplace=True)
+data.reset_index(inplace=True)
+data.drop(['index'],axis = 1,inplace=True)
+data.shape

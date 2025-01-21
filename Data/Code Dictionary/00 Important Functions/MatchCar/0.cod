@@ -1,0 +1,10 @@
+def MatchChar(a,b) : 
+  a,b = str(a),str(b)
+  T,S = 0,0
+  for i in range(len(b)-1) : 
+    T+=1
+    if (b[i:i+2]) in a :
+       S+=1
+  return S/T
+
+MatchChar('abdeac','absdec')

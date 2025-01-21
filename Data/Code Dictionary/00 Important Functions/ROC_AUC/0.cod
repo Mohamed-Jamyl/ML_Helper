@@ -1,0 +1,46 @@
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+sns.set(style="whitegrid")
+
+
+
+
+
+ns_probs = [0 for _ in range(len(y_test))]
+lr_probs = SelectedModel1.predict_proba(X_test)
+lr_probs = lr_probs[:, 1]
+ns_auc = roc_auc_score(y_test, ns_probs)
+lr_auc = roc_auc_score(y_test, lr_probs)
+print('No Skill: ROC AUC=%.3f' % (ns_auc))
+print('Logistic: ROC AUC=%.3f' % (lr_auc))
+
+ns_fpr, ns_tpr, _ = roc_curve(y_test, ns_probs)
+lr_fpr, lr_tpr, _ = roc_curve(y_test, lr_probs)
+
+plt.plot(ns_fpr, ns_tpr, linestyle='--')
+plt.plot(lr_fpr, lr_tpr, marker='.')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.legend()
+plt.show()
+
+
+
+#########################################
+
+def DrawAUC(Model,X_test,y_test) : 
+  ns_probs = [0 for _ in range(len(y_test))]
+  lr_probs = Model.predict_proba(X_test)
+  lr_probs = lr_probs[:, 1]
+  ns_auc = roc_auc_score(y_test, ns_probs)
+  lr_auc = roc_auc_score(y_test, lr_probs)
+  ns_fpr, ns_tpr, _ = roc_curve(y_test, ns_probs)
+  lr_fpr, lr_tpr, _ = roc_curve(y_test, lr_probs)
+  fig, ax = plt.subplots(figsize=(10,6))
+  plt.plot(ns_fpr, ns_tpr, linestyle='--', label='No Skill')
+  plt.plot(lr_fpr, lr_tpr, marker='.', label='Logistic')
+  plt.xlabel('False Positive Rate')
+  plt.ylabel('True Positive Rate')
+  plt.legend()
+  plt.show()    

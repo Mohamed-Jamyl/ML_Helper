@@ -1,0 +1,8 @@
+a = "sweet \n home alabama"
+a= r'C:\some\name'
+a = "sweet \t home alabama"
+a = """ sweet home
+           alabama """
+a , b = 'aaaa' , 'bbbbb'
+print(a,end='')
+print(b)

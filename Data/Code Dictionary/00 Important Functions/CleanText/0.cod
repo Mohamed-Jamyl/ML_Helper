@@ -1,0 +1,12 @@
+import unicodedata
+import nltk
+import re
+def CleanText(feature,N = 10):
+    text = ''.join(str(data[feature].tolist()))
+    stopwords = nltk.corpus.stopwords.words('english')
+    text = (unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8', 'ignore').lower())
+    words = re.sub(r'[^\w\s]', '', text).split()
+    print(f'Number of words are : {len(words)}')
+    print('--------------')
+    print('Sample of words : \n' , words[:N])
+    return [word for word in words if word not in stopwords]   

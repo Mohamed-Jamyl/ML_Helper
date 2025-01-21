@@ -1,0 +1,31 @@
+import io
+def load_vectors(fname,length = 10000):
+    fin = io.open(fname, 'r', encoding='utf-8', newline='\n', errors='ignore')
+    n, d = map(int, fin.readline().split())
+    data = {}
+    i=0
+    for line in fin:
+        i+=1
+        tokens = line.rstrip().split()
+        data[tokens[0]] = tokens[1:]
+        if i == length : 
+            break
+    return data
+ArabicEmbedding = load_vectors(r'E:\Machine Learning\NLP\0 Data\cc.ar.300.vec')
+
+
+
+
+def SimilarWords(Word,List) :
+    WordsDifference = {}
+    for EachWord in List : 
+        if EachWord in ArabicEmbedding.keys() and Word in ArabicEmbedding.keys() :
+            WordsDifference[EachWord] = sum([abs(float(i)-float(j)) 
+                                             for i,j in zip(ArabicEmbedding[Word],ArabicEmbedding[EachWord])])
+    return {k: v for k, v in sorted(WordsDifference.items(), key=lambda item: item[1])}
+
+
+SimilarWords('لعب',
+             [
+                 'ملعب','مرح','ذرة','زجاج','يأكل','أبيض','شجرة'
+             ])

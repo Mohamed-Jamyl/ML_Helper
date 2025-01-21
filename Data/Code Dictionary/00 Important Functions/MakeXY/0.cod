@@ -1,0 +1,5 @@
+def MakeXY(feature) : 
+    global data
+    X = data.drop([feature], axis=1, inplace=False)
+    y = data[feature]
+    return X , y

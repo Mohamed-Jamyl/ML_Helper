@@ -1,0 +1,5 @@
+def SBar(series) : 
+    global data
+    fig, ax = plt.subplots(figsize=(10,6))
+    plt.bar(list(series.index),series.values )
+    plt.show()

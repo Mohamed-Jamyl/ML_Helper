@@ -1,0 +1,163 @@
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import *   
+from PyQt5.QtCore import *  
+import os,random,torch,torchvision
+from PIL import Image
+
+Co = False
+
+class Ui_Dialog(object):
+    global Co
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(384, 479)
+        self.label = QtWidgets.QLabel(Dialog)
+        self.label.setGeometry(QtCore.QRect(10, 10, 71, 16))
+        self.label.setObjectName("label")
+        self.Combo = QtWidgets.QComboBox(Dialog)
+        self.Combo.setGeometry(QtCore.QRect(80, 10, 271, 22))
+        self.Combo.setObjectName("Combo")
+        self.ImageTestCmd = QtWidgets.QPushButton(Dialog)
+        self.ImageTestCmd.setGeometry(QtCore.QRect(10, 50, 111, 23))
+        self.ImageTestCmd.setObjectName("ImageTestCmd")
+        self.FolderTestCmd = QtWidgets.QPushButton(Dialog)
+        self.FolderTestCmd.setGeometry(QtCore.QRect(240, 50, 111, 23))
+        self.FolderTestCmd.setObjectName("FolderTestCmd")
+        self.ResultLabel = QtWidgets.QLabel(Dialog)
+        self.ResultLabel.setGeometry(QtCore.QRect(10, 90, 341, 20))
+        self.ResultLabel.setObjectName("ResultLable")
+        self.EndCmd = QtWidgets.QPushButton(Dialog)
+        self.EndCmd.setGeometry(QtCore.QRect(260, 440, 111, 23))
+        self.EndCmd.setObjectName("EndCmd")
+        self.ResultTxt = QtWidgets.QTextBrowser(Dialog)
+        self.ResultTxt.setGeometry(QtCore.QRect(10, 120, 361, 311))
+        self.ResultTxt.setObjectName("lineEdit")
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        global Co
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.label.setText(_translate("Dialog", "Method Type"))
+        self.ImageTestCmd.setText(_translate("Dialog", "Image Test"))
+        self.FolderTestCmd.setText(_translate("Dialog", "Folder Test"))
+        self.ResultLabel.setText(_translate("Dialog", ""))
+        self.ResultTxt.setText('')
+        self.EndCmd.clicked.connect(sys.exit)
+        self.EndCmd.setText(_translate("Dialog", "Exit"))
+        
+        def Test(Images,ThisClasses,ModelToTest,Multi,ImagesName = None,ImageWidth=50,ImageHeight=50) : 
+            class ImageTestProcessing(torch.utils.data.Dataset):
+                def __init__(self, ImageLocation, TransformerOfPicture):
+                    self.AllImages = ImageLocation
+                    self.ImageLocation = ImageLocation
+                    self.TransformerOfPicture = TransformerOfPicture
+                def __len__(self):
+                    return len(self.AllImages)
+                def __getitem__(self, index):
+                    index = index % len(self.AllImages)
+                    ImagePath = self.AllImages[index]
+                    SelectedImage = Image.open(ImagePath).convert('RGB')
+                    return self.TransformerOfPicture(SelectedImage)
+            def LoadTestData(Data,BatchSize): 
+                LoadedData = torch.utils.data.DataLoader(Data,batch_size = BatchSize)
+                return LoadedData 
+            SelectedTransformer = torchvision.transforms.Compose([torchvision.transforms.Resize(size=(ImageWidth,ImageHeight)),torchvision.transforms.RandomHorizontalFlip(),torchvision.transforms.ToTensor()])
+            ProcessedImages = ImageTestProcessing(Images, SelectedTransformer)
+            LoadedData =  LoadTestData(ProcessedImages,1)
+            SelectedModel = torch.load(ModelToTest)
+            i=-1
+
+            AllText = ''
+            for images in LoadedData:
+                outputs = SelectedModel(images)
+                _, preds = torch.max(outputs, 1)
+                if not Multi : 
+                    if int(preds[0]) == 0 :
+                        Up( f'Predicted valus for the image is ({ThisClasses[int(preds[0])]})')
+                    else : 
+                        Up(f'Predicted valus for the image is ({ThisClasses[int(preds[0])]})','green')            
+                else  : 
+                    
+                    for b in preds :
+                        i+=1
+                        
+                        AllText += f'Image ({str(ImagesName[i])[:10]}) is predicted as : ({ThisClasses[int(b)]})\n'
+                    self.ResultTxt.setText(AllText)
+                    QtWidgets.QApplication.processEvents()
+                    Up(f'Processing Image {i}','g')
+            if Multi : Up(f'Processing Image {i} : Done ','g')
+            QtWidgets.QApplication.processEvents()
+            return None
+   
+        
+        def Up(text,color='r'):
+            self.ResultLabel.setText(text)
+            if color == 'r' : 
+                self.ResultLabel.setStyleSheet('color: red')
+            else : 
+                self.ResultLabel.setStyleSheet('color: green')
+                    
+            QtWidgets.QApplication.processEvents()
+        def CheckData() : 
+            global Co
+            if not os.path.exists('Data') : 
+                Up('Data folder is not exists')
+                Co = False
+            else : 
+                Co = True
+                Folders = os.listdir('Data')
+                for Folder in Folders : 
+                    if os.path.isdir(os.path.join('Data',Folder)) and os.path.exists(os.path.join('Data',Folder,'SavedModel.h5')) and os.path.exists(os.path.join('Data',Folder,'types.txt')): 
+                        self.Combo.addItem(Folder)
+            QtWidgets.QApplication.processEvents()
+        CheckData()
+        def TestImage() : 
+            TheseTypes = []
+            if len(self.Combo.currentText().strip()) ==0 : 
+                Up('Data missing in Data folder')
+                return None 
+            
+            self.FileDialog = QtWidgets.QFileDialog.getOpenFileName(Dialog,'Open File')
+            ThisImage = self.FileDialog[0]
+            if not (ThisImage.split('.')[-1]).lower() in ['jpg','png','jpeg'] : 
+                Up('Invalid Image')
+                return None 
+            if len(ThisImage) > 1 : 
+                if os.path.exists(ThisImage) : 
+                    f = open(os.path.join('Data',str(self.Combo.currentText().strip()),'types.txt'), "r")
+                    TheseTypes.extend(f.read().split('\n'))     
+                    Test(Images=[ThisImage],ThisClasses= TheseTypes,
+                         ModelToTest =os.path.join('Data',str(self.Combo.currentText().strip()),'SavedModel.h5'),
+                         Multi=False)
+
+        def TestFolder() : 
+            TheseTypes = []
+            if len(self.Combo.currentText().strip()) ==0 : 
+                Up('Data missing in Data folder')
+                return None 
+            ThisFolder = QtWidgets.QFileDialog.getExistingDirectory(Dialog,'Open File')
+            if len(ThisFolder) > 1 : 
+                ImagesName = [im for im in os.listdir(ThisFolder) if str(im[-3:]).lower() in ['png','jpg']]
+                Images = [os.path.join(ThisFolder,im) for im in os.listdir(ThisFolder) if str(im[-3:]).lower() in ['png','jpg']]
+                self.ResultLabel.setText("")
+                f = open(os.path.join('Data',str(self.Combo.currentText().strip()),'types.txt'), "r")
+                TheseTypes.extend(f.read().split('\n'))     
+                Test(Images=Images,ThisClasses= TheseTypes,
+                     ModelToTest =os.path.join('Data',str(self.Combo.currentText().strip()),'SavedModel.h5'),
+                     Multi=True,ImagesName=ImagesName)
+        self.ImageTestCmd.clicked.connect(TestImage)
+        self.FolderTestCmd.clicked.connect(TestFolder)
+   
+        
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    Dialog = QtWidgets.QDialog()
+    ui = Ui_Dialog()
+    ui.setupUi(Dialog)
+    Dialog.show()
+    sys.exit(app.exec_())
+    

@@ -1,0 +1,3 @@
+def Unique(feature) : 
+    global data
+    print(f'Number of unique vaure are {len(list(data[feature].unique()))} which are : \n {list(data[feature].unique())}')

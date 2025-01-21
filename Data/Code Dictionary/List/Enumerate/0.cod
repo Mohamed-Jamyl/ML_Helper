@@ -1,0 +1,9 @@
+enumerate
+my_list = ['apple', 'banana', 'grapes', 'pear']
+for c, value in enumerate(my_list, 1):  #start with 1
+    print(c, value)
+------------------------------------------
+
+my_list = ['apple', 'banana', 'grapes', 'pear']
+for c, value in enumerate(my_list, 4):   #start with 4
+    print(c, value)

@@ -1,0 +1,20 @@
+for a,b in zip(pd.Series(AllText.split()).value_counts().index[:30],
+               pd.Series(AllText.split()).value_counts().values[:30]) : 
+  print(f'Word ({a}) repeated ({b}) times')
+
+
+
+# Word (الخطوط) repeated (155) times
+# Word (السعودية) repeated (120) times
+# Word (_) repeated (57) times
+# Word (طيران) repeated (48) times
+# Word (الى) repeated (40) times
+# Word (السعوديه) repeated (37) times
+# Word (الله) repeated (31) times
+# Word (اديل) repeated (26) times
+# Word (الخطوط_السعودية) repeated (25) times
+# Word (ريال) repeated (23) times
+# Word (جدة) repeated (22) times
+# Word (اسعار) repeated (22) times
+# Word (،) repeated (20) times
+# Word (الرياض) repeated (19) times

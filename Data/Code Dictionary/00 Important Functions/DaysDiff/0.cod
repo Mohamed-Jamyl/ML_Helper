@@ -1,0 +1,8 @@
+from datetime import date
+def DaysNumber(date1,date2) : 
+  d0 = date(int(date1.split()[0].split(r'/')[2]), int(date1.split()[0].split(r'/')[0]), int(date1.split()[0].split(r'/')[1]))
+  d1 = date(int(date2.split()[0].split(r'/')[2]), int(date2.split()[0].split(r'/')[0]), int(date2.split()[0].split(r'/')[1]))
+  delta = d1 - d0
+  return delta.days
+
+DaysNumber('1/13/2021','01/01/2022') # month , day , year

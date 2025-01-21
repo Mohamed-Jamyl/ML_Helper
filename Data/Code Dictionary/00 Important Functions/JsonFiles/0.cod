@@ -1,0 +1,86 @@
+import pandas as pd
+import json,os
+
+def JsonFile(File) : 
+    File=str(File)
+    f = open(File,encoding = 'utf-8')
+    data = json.load(f)  
+    print(len(data))
+    AllKeys = []
+    for i in data : 
+        AllKeys.extend(i.keys())
+    Data = pd.DataFrame(columns = set(AllKeys))
+    for j,i in enumerate(data) :
+        Data.loc[j] = 0
+        for a,b in i.items() : 
+            Data.loc[j][a] = str(b)
+    print(Data.shape)
+    Data.to_csv(f'{File}.csv',encoding = 'utf-8')
+    print('---------------------------------')
+
+#------------------------------------
+Path= r'PathHere'
+for file in os.listdir(Path) : 
+    JsonFile(os.path.join(Path,file))
+
+###########################################
+
+f = open('11.json',encoding = 'utf-8')
+data = json.load(f)  
+
+print(len(data))
+
+AllKeys = []
+for i in data : 
+    AllKeys.extend(i.keys())
+Data = pd.DataFrame(columns = set(AllKeys))
+Data.head()
+
+
+
+ThisData = pd.DataFrame(columns = ['0'])
+for j in tqdm(range(len(data))) : 
+    ThisData = pd.concat([ThisData,pd.DataFrame(data[j].values(),index =data[j].keys()).T],axis=0)
+ThisData.drop(['0'],axis=1,inplace=True)
+ThisData.reset_index(inplace=True)
+
+
+ThisData.to_excel('11.xlsx',encoding = 'utf-8')
+
+#############################################
+
+
+Path = r'Path'
+First = True
+for file in os.listdir(Path) : 
+    if file[-4:] =='.csv'  : 
+        if First : 
+            Data = pd.read_csv(os.path.join(Path,file))
+            First = False
+        else : 
+            data = pd.read_csv(os.path.join(Path,file))
+            Data = pd.concat([Data,data],axis= 0)
+        print(data.shape)
+print(Data.shape)
+Data.to_csv('all.csv')
+
+
+###########################################
+
+
+def JsonFile(File) : 
+    File=str(File)
+    f = open(File,encoding = 'utf-8')
+    data = json.load(f)  
+    print(len(data))
+    AllKeys = []
+    for i in data : 
+        AllKeys.extend(i.keys())
+    Data = pd.DataFrame(columns = set(AllKeys))
+    for j,i in enumerate(data) :
+        Data.loc[j] = 0
+        for a,b in i.items() : 
+            Data.loc[j][a] = str(b)
+    print(Data.shape)
+    Data.to_csv(f'{File}.csv',encoding = 'utf-8')
+    print('---------------------------------')

@@ -1,0 +1,3 @@
+data = pd.read_csv('**.csv' ,encoding= '**')  
+print(f'Data Shape is {data.shape}')
+data.head()

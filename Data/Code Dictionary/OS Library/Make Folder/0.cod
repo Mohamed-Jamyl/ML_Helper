@@ -1,0 +1,1 @@
+os.makedirs('D:\\1\\00' , exist_ok = True)

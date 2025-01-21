@@ -1,0 +1,26 @@
+data.dtypes
+
+
+# Airline                object
+# Source                 object
+# Destination            object
+# Route                  object
+# Total_Stops            object
+# Additional_Info        object
+# Price                   int64
+# Journey_day             int64
+# Journey_month           int64
+# Dep_Time_hour           int64
+# Dep_Time_minute         int64
+# Arrival_Time_hour       int64
+# Arrival_Time_minute     int64
+# Duration_hours          int32
+# Duration_mins           int32
+# dtype: object
+
+#######################################################
+
+CategoricalColumns=[col for col in data.columns if train_data[col].dtype=='O']
+NumericalColumns=[col for col in data.columns if train_data[col].dtype!='O']
+
+

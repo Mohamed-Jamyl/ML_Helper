@@ -1,0 +1,11 @@
+import difflib
+def GetMatchWords(Word,List) : 
+    LL = []
+    for i in List : 
+        L = difflib.get_close_matches(Word,i.split())
+        if len(L) > 0 : LL.extend(L)    
+    LL = [i.strip().strip('(').strip(')').strip('.').strip(',') for i in LL]        
+    return list(set(LL))
+
+
+GetMatchWords('brone',['bread','civilized','trees','grey','broke','whole','board'])

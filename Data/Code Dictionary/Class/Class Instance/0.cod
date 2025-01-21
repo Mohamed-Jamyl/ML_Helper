@@ -1,0 +1,9 @@
+class car() :
+    def __init__(self, color):
+        self.color = color
+    
+volvo = car('white')
+nissan = car('green')
+
+print(volvo.color)
+print(nissan.color)

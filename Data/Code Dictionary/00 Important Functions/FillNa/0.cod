@@ -1,0 +1,3 @@
+def FillNa(feature , val = 'none') : 
+    global data
+    data[feature].fillna(val, inplace=True)

@@ -1,0 +1,389 @@
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+import pandas as pd
+import glob as gb
+
+
+S1,S2,S3,S4,S5,S6 = [],[],[],[],[],[]
+case = ''
+
+class Ui_MainWindow(object):
+    global case
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(936, 573)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.groupBox.setGeometry(QtCore.QRect(10, 10, 901, 521))
+        self.groupBox.setObjectName("groupBox")
+        self.ChatText = QtWidgets.QTextBrowser(self.groupBox)
+        self.ChatText.setGeometry(QtCore.QRect(10, 20, 481, 461))
+        self.ChatText.setObjectName("ChatText")
+        self.EntryText = QtWidgets.QLineEdit(self.groupBox)
+        self.EntryText.setGeometry(QtCore.QRect(10, 490, 481, 20))
+        self.EntryText.setObjectName("EntryText")
+        
+        self.ScrollArea = QtWidgets.QScrollArea(self.groupBox)
+        self.ScrollArea.setGeometry(QtCore.QRect(500, 20, 390, 450))
+        self.ScrollArea.setFrameShape(QtWidgets.QFrame.Box)
+        self.widget = QtWidgets.QWidget() 
+        self.vbox = QtWidgets.QVBoxLayout()
+        self.ScrollArea.setWidget(self.widget)
+        self._lay = QtWidgets.QVBoxLayout()
+
+        self.EnterButton = QtWidgets.QPushButton(self.groupBox)
+        self.EnterButton.setGeometry(QtCore.QRect(510, 490, 75, 23))
+        self.EnterButton.setObjectName("pushButton")
+        self.ExitButton = QtWidgets.QPushButton(self.groupBox)
+        self.ExitButton.setGeometry(QtCore.QRect(820, 490, 75, 23))
+        self.ExitButton.setObjectName("pushButton_2")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        global case
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "Tamara Chatbot"))
+        self.groupBox.setTitle(_translate("MainWindow", "Tamara Chatbot"))
+        self.EnterButton.setText(_translate("MainWindow", "Enter"))
+        self.ExitButton.setText(_translate("MainWindow", "Exit"))
+        self.ExitButton.clicked.connect(sys.exit)
+        MainWindow.setWindowIcon(QtGui.QIcon('0.png'))   
+        
+        
+        ##########################
+        #  Phrases
+        ##########################
+        data = pd.DataFrame()
+        p0 = '''
+        شكرا لاستخدام متصفح الرد الذكي لتمارا , نتمني أن نراكم قريبا . .  
+        '''
+        p1 = '''مرحبا بكم في متصفح الرد الذكي لتمارا . . 
+
+من فضلك اكتب حرف م لاستعراض اسماء الأمراض
+او حرف ب للبحث بكلمة محددة
+و يمكنك كتابة حرف خ في أي وقت للإنتهاء
+        '''
+        p2 = '''
+        لدينا عدد من أمراض النخيل وهي : 
+        '''
+        p3 = '''
+         من فضلك قم بكتابة رقم المرض المطلوب لاستعراض تفاصيل أكثر عنه
+        '''
+        p4 = '''
+        من فضلك أدخل أحد كلمات البحث , مثل كلمة (سوس) او (عذوق)
+        '''
+        p5 = '''
+        يمكنك استعراض مرض آخر عبر كتابة رقمه , او اكتب حرف خ للعودة للقائمة الرئيسية
+        '''
+        p6 = '''
+        رقم غير صحيح , من فضلك اختر رقم 0 او 1 او 2 
+        '''
+        p7 = '''
+        رقم غير صحيح , من فضلك اختر رقم أحد الأمراض الموجودة 
+        '''
+        p8 ='''
+        من فضلك أدخل رقم صحيح
+        '''
+        p9 = '''
+        من فضلك اكتب 1 لعرض نتائج الاسماء \n او 2 لعرض النبذة \n او 3 لعرض الأعراض \n او 4 لعرض الأسباب \n او 5 لعرض الحلول \n او 6 لعرض الصور \n  او اكتب حرف خ للعودة للقائمة الرئيسية
+        '''
+        p10 = '''
+        لا توجد قيم لعرضها
+        '''
+  
+        ##########################
+        #  Functions
+        ##########################
+
+        def Up(text='',Erase = False) :
+            if Erase : 
+                text = text
+            else  : 
+                text = self.ChatText.toPlainText() + '\n' + text
+            self.ChatText.setText(text)
+            
+            QScrollBar  = self.ChatText.verticalScrollBar()
+            QScrollBar.setValue(QScrollBar.maximum())
+            QtWidgets.QApplication.processEvents()
+
+        def GetImages(n) :
+            a = gb.glob1(str('data\\' + str(n) + '\\') , '*.png' )
+            b = gb.glob1(str('data\\' + str(n) + '\\') , '*.jpg' )
+            a.extend(b)
+            AllText = ''
+            for x in a : 
+                    AllText+= ('\n' + x)
+            return AllText
+
+        def ShowList(l) : 
+            if len(l) == 0 : 
+                Up(p10)
+            else :    
+                for a,b in enumerate(l) : 
+                    Up('----------------')
+                    Up(f' العنصر رقم  {a+1}  هو :')
+                    Up(f'---> {b}')
+
+                Up('*******************************')
+
+        def ShowImages(Images) : 
+            self.widget = QtWidgets.QWidget()                 
+            self.vbox = QtWidgets.QVBoxLayout()               
+            for Image in Images : 
+                object = QtWidgets.QLabel('')
+                object.setPixmap(QtGui.QPixmap(Image))
+                self.vbox.addWidget(object)
+            self.widget.setLayout(self.vbox)
+            self.ScrollArea.setWidget(self.widget)
+            QtWidgets.QApplication.processEvents()
+            return None
+                
+                
+        ##########################
+        #  Code
+        ##########################
+                
+        
+        ID,AD,ED,D1,D2,D3,D4,D5 = [],[],[],[],[],[],[],[]
+        
+        f= open('data//names.txt','r' , encoding="utf8")
+        nn = 0
+        for a in f:
+            if nn == 0 : 
+                ID.append(a.rstrip())
+                nn+=1
+            elif nn==1 : 
+                AD.append(a.rstrip())
+                nn+=1
+            elif nn == 2 :
+                ED.append(a.rstrip())
+                nn=0
+        for i in ID : 
+            X1,X2,X3,X4 = '','','',''
+            N1,N2,N3,N4 = 0,0,0,0
+            temp = []
+            f= open(str('data//' +i+'//0.txt'),'r',encoding="utf8")
+            NN = 0
+            for a in f:
+                temp.append(a.rstrip())
+                if len(a.rstrip()) == 1 and a.rstrip() == 'a' : N1 = NN
+                if len(a.rstrip()) == 1 and a.rstrip() == 'b' : N2 = NN
+                if len(a.rstrip()) == 1 and a.rstrip() == 'c' : N3 = NN
+                if len(a.rstrip()) == 1 and a.rstrip() == 'd' : N4 = NN                    
+                NN+=1    
+            for u in temp[N1+1:N2] : 
+                if not (u.strip() =='') : X1 = X1 + '\n' + u
+            for u in temp[N2+1:N3] : 
+                if not (u.strip() =='') : X2 = X2 + '\n' + u
+            for u in temp[N3+1:N4] : 
+                if not (u.strip() =='') : X3 = X3 + '\n' + u
+            for u in temp[N4+1:] : 
+                if not (u.strip() =='') : X4 = X4 + '\n' + u
+            D1.append(X1)
+            D2.append(X2)
+            D3.append(X3)
+            D4.append(X4)
+
+
+        data = pd.concat([pd.Series(ID),pd.Series(AD),pd.Series(ED),pd.Series(D1)
+                          ,pd.Series(D2),pd.Series(D3),pd.Series(D4)],axis=1)
+        data = data.rename(columns={0:"ID",1: "arabic_name", 2:"english_name",
+                                   3:'about',4:'syndrome',5:'reasons',6:'healing'})
+        data['Images'] = data['ID'].apply(GetImages)
+
+        Up(p1,True)
+        
+        def EnterClick() : 
+            global case,S1,S2,S3,S4,S5,S6
+            i = self.EntryText.text().strip()
+            
+            if i.strip() =='م' : 
+                case = 'Listing'
+            elif i.strip() =='ب' : 
+                case = 'Searching'
+                Up(p4)
+                self.EntryText.setText('')
+                self.EntryText.setFocus()
+                QtWidgets.QApplication.processEvents()    
+                return None
+            elif i.strip() =='خ' : 
+                case = ''
+                Up(p1,True)
+                Up(p0)
+                self.EntryText.setText('')
+                self.EntryText.setFocus()
+                QtWidgets.QApplication.processEvents()    
+                return None
+
+            
+            try : 
+                i = int(i)
+            except : 
+                i= str(i)
+             
+        
+            if case == 'Listing' : 
+                Up(p2)
+                Up('---------------------------------')
+                for i in range(data.shape[0]) : 
+                    Up(f'مرض رقم {data["ID"][i]}  و اسمه بالعربية  :  {data["arabic_name"][i]}  و اسمه بالإنجليزية  {data["english_name"][i]}')
+                Up('---------------------------------')
+                Up(p3)
+                case = 'Disease Showing'
+                self.EntryText.setText('')
+                self.EntryText.setFocus()
+                QtWidgets.QApplication.processEvents()    
+                return None
+ 
+            elif case == 'Disease Showing' :     
+                if not(int(i) in range(data.shape[0]+1)) : 
+                    Up(p7)
+                    self.EntryText.setText('')
+                    self.EntryText.setFocus()
+                    QtWidgets.QApplication.processEvents()    
+                    return None
+ 
+                else : 
+                    i = int(i) - 1
+                    Up(f'المرض باللغة العربية   :  {data.iloc[i,1]}')
+                    Up(f'المرض باللغة الإنجليزية   :  {data.iloc[i,2]}')
+                    if len(str(data.iloc[i,3]).strip()) > 0 : 
+                        Up()
+                        Up('عن المرض : ')
+                        Up(data.iloc[i,3])
+                        Up('----------------------------------------------')
+                    if len(str(data.iloc[i,4]).strip()) > 0 : 
+                        Up()
+                        Up('الأعراض  : ')
+                        Up(data.iloc[i,4])
+                        Up('----------------------------------------------')
+                    if len(str(data.iloc[i,5]).strip()) > 0 : 
+                        Up()
+                        Up('الأسباب : ')
+                        Up(data.iloc[i,5])
+
+                        Up('----------------------------------------------')
+                    if len(str(data.iloc[i,6]).strip()) > 0 : 
+                        Up()
+                        Up('طرق العلاج  : ')
+                        Up(data.iloc[i,6])
+                        Up('----------------------------------------------')
+                    if len(str(data.iloc[i,7]).strip()) > 0 : 
+                        Up()
+                        
+                        TheseImages = []
+                        for k in ((data.iloc[i,7]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                TheseImages.append(str('data\\' + str(i+1)  + '\\' + k))
+                        ShowImages(TheseImages)
+                    Up(p5)
+     
+            elif case == 'Searching' :                 
+                SW = str(i).strip()
+                
+
+                for x in range(data.shape[0]) : 
+                    if SW in str(data['arabic_name'][x]) :
+                        S1.append(str(data['arabic_name'][x]))
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+
+                    if SW in str(data['english_name'][x]) :
+                        S1.append(str(data['english_name'][x]))                        
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+
+                    if SW in str(data['about'][x]) :
+                        S2.append(str(data['about'][x]))                        
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+
+                    if SW in str(data['syndrome'][x]) : 
+                        S3.append(str(data['syndrome'][x]))                                                
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+
+                    if SW in str(data['reasons'][x]) : 
+                        S4.append(str(data['reasons'][x]))                        
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+
+                    if SW in str(data['healing'][x]) : 
+                        S5.append(str(data['healing'][x]))                        
+                        for k in ((data['Images'][x]).strip()).split('\n') : 
+                            if len(k) > 0 : 
+                                S6.append(str('data\\' + str(data['ID'][x])  + '\\' + k))
+
+                S6 = list(set(S6))
+                Up(f'  نتائج البحث عن كلمة :  {SW}')
+                
+                Up(f'تم العثور علي :  {len(S1)} نتائج في الأسماء (اضغط رقم 1) \nو   {len(S2)} نتائج في النبذة (اضغط رقم 2) \nو  {len(S3)} نتائج في الأعراض (اضغط رقم 3)\nو  {len(S4)} نتائج في الأسباب (اضغط رقم 4) \nو  {len(S5)} نتائج في الحلول (اضغط رقم 5) \nو   {len(S6)} نتائج في الصور (اضغط رقم 6) ')        
+
+                case = 'Searching Result'
+                self.EntryText.setText('')
+                self.EntryText.setFocus()
+                QtWidgets.QApplication.processEvents()    
+                return None
+
+
+            elif case  == 'Searching Result' : 
+                i = str(i)
+                if i=='1' : 
+                    Up('أسماء الأمراض هي : ')
+                    ShowList(S1)
+                    Up('--------------------------------')
+                    Up(p9)
+                elif i=='2' : 
+                    Up('النبذات هي هي : ')
+                    ShowList(S2)
+                    Up('--------------------------------')
+                    Up(p9)
+                elif i=='3' : 
+                    Up('الأعراض هي : ')
+                    ShowList(S3)
+                    Up('--------------------------------')
+                    Up(p9)
+                elif i=='4' : 
+                    Up('الأسباب هي : ')
+                    ShowList(S4)
+                    Up('--------------------------------')
+                    Up(p9)
+                elif i =='5' : 
+                    Up('الحلول هي : ')
+                    ShowList(S5)
+                    Up('--------------------------------')
+                    Up(p9)
+                elif i =='6' : 
+                    Up('الصور هي : ')
+                    TheseImages = []
+                    for k in S6 : 
+                        if len(k) > 0 : 
+                            TheseImages.append(k)
+                    ShowImages(TheseImages)
+                    Up(p9)
+            self.EntryText.setText('')
+            self.EntryText.setFocus()
+            QtWidgets.QApplication.processEvents()    
+            return None
+        
+        self.EntryText.returnPressed.connect(EnterClick)
+        self.EnterButton.clicked.connect(EnterClick)
+        self.EntryText.setFocus()
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+

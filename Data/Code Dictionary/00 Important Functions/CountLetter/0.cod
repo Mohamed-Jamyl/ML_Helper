@@ -1,0 +1,6 @@
+import re
+def CountLetter(Text,Letter) : 
+  return len(re.findall(Letter.lower(), Text.lower()))
+
+
+CountLetter('sdvksaaaadfvklnsdf;kjlnasd;klads','a')

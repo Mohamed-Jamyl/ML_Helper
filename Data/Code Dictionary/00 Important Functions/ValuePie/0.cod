@@ -1,0 +1,4 @@
+def ValuePie(ValueList, LabelList) : 
+    fig, ax = plt.subplots(figsize=(10,6))
+    plt.pie(ValueList,labels=LabelList,autopct ='%1.2f%%' , labeldistance = 1.1,explode = [0.05 for i in range(len(ValueList))])
+    plt.show()  

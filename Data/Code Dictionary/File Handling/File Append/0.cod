@@ -1,0 +1,1 @@
+f= open('D:\\1\\1.txt','a') #append

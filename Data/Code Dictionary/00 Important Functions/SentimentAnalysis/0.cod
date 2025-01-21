@@ -1,0 +1,11 @@
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+nltk.download('vader_lexicon')
+SIA = SentimentIntensityAnalyzer()
+
+
+data['SA Negative'] = data['Cleaned Text'].apply(lambda x : list(SIA.polarity_scores(x).values())[0])
+data['SA Neutral'] = data['Cleaned Text'].apply(lambda x : list(SIA.polarity_scores(x).values())[1])
+data['SA Positive'] = data['Cleaned Text'].apply(lambda x : list(SIA.polarity_scores(x).values())[2])
+data['SA Compound'] = data['Cleaned Text'].apply(lambda x : list(SIA.polarity_scores(x).values())[3])
+
+data[['Cleaned Text','SA Negative','SA Neutral','SA Positive','SA Compound']].head(30)

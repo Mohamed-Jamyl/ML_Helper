@@ -1,0 +1,10 @@
+def PredictTweet(Text) : 
+  X_Predict = VecModel.transform(pd.Series([Text]))
+  X_Predict = pd.DataFrame.sparse.from_spmatrix(X_Predict)
+  X_Predict = np.array(X_Predict)
+  Dict = {0:'Negative Tweet',1:'Positive Tweet'}
+  return Dict[BestModel.predict(X_Predict)[0]]
+
+
+
+PredictTweet('الطيران السعودي عندي ولاء لكم ')

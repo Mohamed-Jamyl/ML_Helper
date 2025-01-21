@@ -1,0 +1,7 @@
+def Mapp(feature , new_feature ,f_dict, drop_feature = True) : 
+    global data
+    data[new_feature] = data[feature].map(f_dict)
+    if drop_feature == True : 
+        data.drop([feature],axis=1, inplace=True)
+    else :
+        data.head()

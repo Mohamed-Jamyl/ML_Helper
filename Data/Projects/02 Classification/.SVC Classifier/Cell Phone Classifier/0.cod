@@ -1,0 +1,600 @@
+# # Mobile Phone Price Classification
+# by : Hesham Asem
+# 
+# 
+# here we have two datasets , the training which contain 2000 sample of cell phone features & the price range between 0 , 1 , 2 , 3
+# 
+# then a test dataset which contain 1000 sample size with the same features 
+# 
+# https://www.kaggle.com/iabhishekofficial/mobile-price-classification
+# 
+# our task is to classifiy the test dataset , to know the price range for each one of the 1000 test dataset
+# 
+# ____
+# 
+# let's start with importing the libraries
+# 
+
+# In[1]:
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+get_ipython().run_line_magic('matplotlib', 'inline')
+import seaborn as sns
+sns.set(style="whitegrid")
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+
+from sklearn.ensemble import VotingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import SGDClassifier 
+
+
+# then let's read the datasets
+
+# In[2]:
+
+
+train = pd.read_csv('train.csv')
+test = pd.read_csv('test.csv')
+
+
+# how about training dataset
+
+# In[3]:
+
+
+train.head()
+
+
+# & here its shape
+
+# In[4]:
+
+
+train.shape
+
+
+# also here the test dataset ( which we'll not need it right now )
+
+# In[5]:
+
+
+test.head()
+
+
+# also its shape
+
+# In[6]:
+
+
+test.shape
+
+
+# ____
+# 
+# # Data Processing
+# 
+# we need to have a quick look to the features in the training dataset
+
+# In[7]:
+
+
+train.describe()
+
+
+# we can notice there are some features which are binary ( either 0 or 1 ) like : blue , dual_sim , fc , four_g  and so 
+# 
+# also there are no categorical values , so we'll not be in need for aking dummies
+# 
+# how about the usual problem the Nulls . 
+
+# In[8]:
+
+
+train.info()
+
+
+# great , clean data with no nulls nor missing data . let's move on . 
+# 
+# ____
+# 
+# # Features Effect
+# 
+# we need to measure the effect of some features , to know weather we'll keep them ot drop them if they are useless
+# 
+# let's first have a look to distribution of price range among all data set
+
+# In[18]:
+
+
+sns.countplot(x="price_range", data=train,facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3))
+
+
+# ok , it's equally distributed , 500 sample size for each class . 
+# 
+# now let's have a list of all features
+
+# In[19]:
+
+
+train.columns
+
+
+# ok , lets have a look to the battery_power feature , to know unique values for it
+# 
+
+# In[20]:
+
+
+print('number of unique values for attery power is : {}'.format(len(train.battery_power.unique())))
+train.battery_power.unique()
+
+
+# more than 1000 unique values will make it not easy to show its statistics , ok let's make a temporary new feature , which will be rounded values for dividing it by 100 , so we can reduce number of unizue values , to make it easy
+
+# In[21]:
+
+
+train['battery code'] = round(train['battery_power']/100)
+
+
+# now how about unique values for the new feature 
+
+# In[22]:
+
+
+print('number of unique values for attery power is : {}'.format(len(train['battery code'].unique())))
+train['battery code'].unique()
+
+
+# great  , only 16 values make it easier now to start using seaborn on it , to find correlation between it & price range
+
+# In[23]:
+
+
+sns.jointplot("battery code", "price_range", train, kind='kde')
+
+
+# looks that majority of cell phones with low battery power , concentrated in the area of less price range , & vice versa
+# 
+# how about the amount of phones with specific battery power versus price range , lets use barplot
+
+# In[25]:
+
+
+sns.barplot(x="battery code", y="price_range", data=train)
+
+
+# it show kinda same result , which means that battery power is an important feature or training cause it affects the price 
+# 
+# 
+# ok , we don't need that new feature any more , let's drop it & we'll use the original battery_power in the training later
+
+# In[ ]:
+
+
+train.drop(['battery code'], axis=1, inplace=True)
+
+
+# how about the relationship between dual sim & price range  ? 
+
+# In[29]:
+
+
+sns.barplot(x="dual_sim", y="price_range", data=train)
+
+
+# oh , it looks that existing or vanishing the dual sim in the phone , will not affect so much in the price range , & that mean that this feature is kinda useless
+# 
+# so it's better to drop it , to avoid any misleading in the training
+# 
+# 
+
+# In[30]:
+
+
+train.drop(['dual_sim'], axis=1, inplace=True)
+
+
+# ____
+# 
+# now let's check the bluetooth & its affect on price
+
+# In[31]:
+
+
+sns.barplot(x="blue", y="price_range", data=train)
+
+
+# again , it doesn't matter weather the phone got bluetooth or not , so dropping it will be a good idea to avoid any misleading
+
+# In[32]:
+
+
+train.drop(['blue'], axis=1, inplace=True)
+
+
+# let's check the clock speed
+
+# In[33]:
+
+
+sns.jointplot("clock_speed", "price_range", train, kind='kde')
+
+
+# yea it's affect is not so much , but some how it will be useful , so let's keep it 
+# 
+# ____________
+# 
+# # Feature Correlation
+# 
+# also we need to have a look to the correlation some features & the output (Price_range)
+# 
+# since we have several features , so making a one confusion matrix will not be a good idea , cause it will show nothing 
+# 
+# so we'll make a temporary sliced dataframe , which will contain some feature each time , added to the price range
+
+# In[37]:
+
+
+sliced_train = train.loc[:,['price_range','battery_power','clock_speed'] ]
+
+
+# let's have a look to it 
+
+# In[38]:
+
+
+sliced_train.head()
+
+
+# ok , let's use heatmap from seaborn to see its correlation
+
+# In[39]:
+
+
+sns.heatmap(sliced_train.corr(), annot=True, linewidths=.5, fmt= '.1f')
+
+
+# clock speed have no strong correlation , but let's keep it
+# 
+# now we'll repeat the same step with other features
+
+# In[40]:
+
+
+sliced_train = train.loc[:,['price_range','fc', 'four_g', 'int_memory', 'm_dep', 'mobile_wt', 'n_cores']]   
+
+
+# In[41]:
+
+
+sliced_train.head()
+
+
+# In[42]:
+
+
+sns.heatmap(sliced_train.corr(), annot=True, linewidths=.5, fmt= '.1f')
+
+
+# again with other features
+
+# In[43]:
+
+
+sliced_train = train.loc[:,['price_range', 'pc', 'px_height', 'px_width', 'ram', 'sc_h', 'sc_w']]   
+
+
+# In[44]:
+
+
+sliced_train.head()
+
+
+# In[45]:
+
+
+sns.heatmap(sliced_train.corr(), annot=True, linewidths=.5, fmt= '.1f')
+
+
+# and the last part
+
+# In[46]:
+
+
+sliced_train = train.loc[:,['price_range', 'talk_time', 'three_g', 'touch_screen', 'wifi']]   
+
+
+# In[47]:
+
+
+sliced_train.head()
+
+
+# In[48]:
+
+
+sns.heatmap(sliced_train.corr(), annot=True, linewidths=.5, fmt= '.1f')
+
+
+# ___
+# 
+# # Splitting the Data
+# 
+# ok , since we are ready now , we'll need first to divide the training data into training & test datasets , to be able to check the model accuracy 
+# 
+# let's first specify features & output 
+
+# In[49]:
+
+
+X_data = train.drop(['price_range'], axis=1, inplace=False)
+y_data = train['price_range']
+
+
+# now how X looks ? 
+
+# In[50]:
+
+
+X_data.head()
+
+
+# now let's use sklearn to divide it intro training & testing data
+
+# In[51]:
+
+
+X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.33, random_state=44, shuffle =True)
+
+
+# and have a look to their dimensions
+
+# In[52]:
+
+
+print('X_train shape is ' , X_train.shape)
+print('X_test shape is ' , X_test.shape)
+print('y_train shape is ' , y_train.shape)
+print('y_test shape is ' , y_test.shape)
+
+
+# ___
+# 
+# # Building the Model
+# 
+# 
+# how about using SVC ? he is a good classifier
+# 
+# so let's use girdsearch tool , to pick the best parameters for it , specially th kernel type & the value of C
+# 
+
+# In[53]:
+
+
+SelectedModel = SVC(gamma='auto_deprecated')
+SelectedParameters = {'kernel':('linear', 'rbf'), 'C':[1,2,3,4,5]}
+
+
+GridSearchModel = GridSearchCV(SelectedModel,SelectedParameters, cv = 2,return_train_score=True)
+GridSearchModel.fit(X_train, y_train)
+sorted(GridSearchModel.cv_results_.keys())
+GridSearchResults = pd.DataFrame(GridSearchModel.cv_results_)[['mean_test_score', 'std_test_score', 'params' , 'rank_test_score' , 'mean_fit_time']]
+
+
+# ____
+# 
+# ok , what are the best values for it  ? 
+
+# In[54]:
+
+
+print('All Results are :\n', GridSearchResults )
+print('===========================================')
+print('Best Score is :', GridSearchModel.best_score_)
+print('===========================================')
+print('Best Parameters are :', GridSearchModel.best_params_)
+print('===========================================')
+print('Best Estimator is :', GridSearchModel.best_estimator_)
+
+
+# a 97% accuracy looks great , now let's use the best estimator ( with linear kernel & C = 1) to fit our data
+
+# In[55]:
+
+
+SVCModel =  GridSearchModel.best_estimator_
+SVCModel.fit(X_train, y_train)
+
+
+# now how about its score in training & testing data ? 
+
+# In[56]:
+
+
+print('SVCModel Train Score is : ' , SVCModel.score(X_train, y_train))
+print('SVCModel Test Score is : ' , SVCModel.score(X_test, y_test))
+print('----------------------------------------------------')
+
+
+y_pred = SVCModel.predict(X_test)
+print('Predicted Value for SVCModel is : ' , y_pred[:10])
+
+
+# a very good accuracy , & even we avoided OF , since test accuracy is 96%
+# 
+# ____
+# 
+# ok let's check if Logistic Regression might help us , also using GirdSearch tool 
+
+# In[57]:
+
+
+SelectedModel = LogisticRegression(penalty='l2' , solver='sag',random_state=33)
+SelectedParameters = {'C':[1,2,3,4,5]}
+
+
+GridSearchModel = GridSearchCV(SelectedModel,SelectedParameters, cv = 4,return_train_score=True)
+GridSearchModel.fit(X_train, y_train)
+sorted(GridSearchModel.cv_results_.keys())
+GridSearchResults = pd.DataFrame(GridSearchModel.cv_results_)[['mean_test_score', 'std_test_score', 'params' , 'rank_test_score' , 'mean_fit_time']]
+
+
+# how about its result ? 
+
+# In[58]:
+
+
+print('All Results are :\n', GridSearchResults )
+print('===========================================')
+print('Best Score is :', GridSearchModel.best_score_)
+print('===========================================')
+print('Best Parameters are :', GridSearchModel.best_params_)
+print('===========================================')
+print('Best Estimator is :', GridSearchModel.best_estimator_)
+
+
+# ohhh , only 62 % , which will not be suitable at all . . 
+# 
+# ____
+# 
+# ok how about using Voting Classifier , which will use (Decision Tree, Gaussian NB , Bernoulli NB , Multinomial NB , and SGD Classifier ) ? 
+# 
+# let's use it 
+
+# In[59]:
+
+
+DTModel_ = DecisionTreeClassifier(criterion = 'entropy',max_depth=3,random_state = 33)
+GaussianNBModel_ = GaussianNB()
+BernoulliNBModel_ = BernoulliNB(alpha = 0.1)
+MultinomialNBModel_= MultinomialNB(alpha = 0.1)
+SGDModel_ = SGDClassifier(loss='log', penalty='l2', max_iter=10000, tol=1e-5)
+
+
+# In[60]:
+
+
+#loading Voting Classifier
+VotingClassifierModel = VotingClassifier(estimators=[('DTModel',DTModel_),('GaussianNBModel',GaussianNBModel_),
+                                                     ('BernoulliNBModel',BernoulliNBModel_),
+                                                     ('MultinomialNBModel',MultinomialNBModel_),
+                                                     ('SGDModel',SGDModel_)], voting='hard')
+VotingClassifierModel.fit(X_train, y_train)
+
+
+# how about the score ? 
+
+# In[61]:
+
+
+#Calculating Details
+print('VotingClassifierModel Train Score is : ' , VotingClassifierModel.score(X_train, y_train))
+print('VotingClassifierModel Test Score is : ' , VotingClassifierModel.score(X_test, y_test))
+print('----------------------------------------------------')
+
+
+# not very good , only SVC which show best accuracy 
+# 
+# ____
+# 
+# so let's use it now to apply for the read test dataset
+
+# In[62]:
+
+
+SVCModel =  SVC(C=1, cache_size=200, class_weight=None, coef0=0.0,decision_function_shape='ovr', degree=3,
+                gamma='auto_deprecated',kernel='linear', max_iter=-1, probability=False, random_state=None,
+                shrinking=True, tol=0.001, verbose=False)
+SVCModel.fit(X_train, y_train)
+
+print('SVCModel Train Score is : ' , SVCModel.score(X_train, y_train))
+print('SVCModel Test Score is : ' , SVCModel.score(X_test, y_test))
+print('----------------------------------------------------')
+
+
+# ___
+# 
+# # Predict Test Data
+# 
+# ok , let's now have look to the real test data (which is different from test data used in the model) 
+
+# In[63]:
+
+
+test.head()
+
+
+# we need to drop 'id' feature , plus the two unused feature from training data (blue & dual_sim)
+
+# In[64]:
+
+
+test.drop(['id','blue','dual_sim'], axis=1, inplace=True)
+
+
+# also we need to be sure that there are only 18 features
+
+# In[66]:
+
+
+print('Test Dimension is {}'.format(test.shape))
+test.head()
+
+
+# which will have to be exactly like the 18 features in training dataset
+
+# In[67]:
+
+
+print('X_train Dimension is {}'.format(X_train.shape))
+X_train.head()
+
+
+# perfect , now lets predict it
+
+# In[68]:
+
+
+final_result = SVCModel.predict(test)
+final_result
+
+
+# and insert it as a new feature in the test dataframe
+
+# In[70]:
+
+
+test.insert(18,'Expected Price',final_result)
+
+
+# here we go , here is the final result
+
+# In[71]:
+
+
+test.head(30)
+
+
+# ___
+# 
+# # Finally
+# 
+# hope you enjoyed it & found this kernel useful 
+# 
+# 
+
+# In[ ]:
+
+
+
+

@@ -1,0 +1,37 @@
+list(a)
+sorted(list(a))
+set(x)
+a.split() # split by space
+a.split('s ') #split be charachter
+a.splitlines() #split each line
+a.partition('and') #part by a word
+a.rpartition('and') #same but at right
+a.find('he') #search from left
+a.rfind('he') #search from right
+a.index('e')
+a.replace ('f','i')
+a.replace ('sweet','ugly')
+a.count('m')
+a.capitalize()
+a.title()
+a.upper()
+a.swapcase()
+a.center(30)
+a.ljust(30) #add spaces
+a.rjust(30)
+a.rjust(30 ,'*')
+'435'.zfill(10) #add zeros
+a.isalpha() #all letters are alphabetic
+a.strip() #trim spaces
+a.rstrip()
+a.lstrip()
+x = "**abc**"
+print(x.strip('*'))  #trim specific character
+a.isdigit()
+a.isupper() 
+a.islower() 
+a.istitle()
+a.endswith(‘alabama’)
+a.startswith(‘sweet’)
+a = ', '.join( ('one', 'two', 'three') )
+'  '.join('hello')

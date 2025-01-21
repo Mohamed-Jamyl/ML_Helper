@@ -1,0 +1,30 @@
+import os,cv2
+import glob as gb
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+
+
+w,h=50,40
+i=0
+X,Y = [],[]
+
+for folder in   os.listdir(Path) : 
+  print(folder)
+  x,y = [],[]
+  files = gb.glob(pathname= str( Path +'//' + folder + '/*.jpg'))
+  for file in files [::10] : 
+    image = cv2.imread(os.path.join(Path,folder,file))
+    x.append(list(cv2.resize  (image, (w,h))))
+    y.append(ClassesDict[str(folder)])
+  X.extend(x)
+  Y.extend(y)
+
+####################################
+
+plt.figure(figsize=(20,20))
+for n , i in enumerate(list(np.random.randint(0,len(X),36))) : 
+    plt.subplot(6,6,n+1)
+    plt.imshow(X[i])   
+    plt.axis('off')
+    plt.title(Y[i])

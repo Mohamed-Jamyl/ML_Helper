@@ -1,0 +1,10 @@
+def SelectedData(feature , value , operation, selected_feature ):
+    global data
+    if operation==0 : 
+        result = data[data[feature]==value][selected_feature]
+    elif operation==1 : 
+        result = data[data[feature] > value][selected_feature]
+    elif operation==2 : 
+        result = data[data[feature]< value][selected_feature]
+    
+    return result 

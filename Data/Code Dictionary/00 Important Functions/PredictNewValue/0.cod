@@ -1,0 +1,45 @@
+import pandas as pd
+
+NeededFeatures = ['a','b','c','d','e','f','g','h','i']
+Values = {}
+for i in NeededFeatures : 
+    Values[i] = input(f'What is {i} Value ? ')
+
+    
+ValuesSR = pd.Series(list(Values.values()))    
+Model.predict([ValuesSR])
+
+
+#######################################
+
+
+SpeedLimitValue = 60
+LanesValue = 4
+CTPPValue = 8.62
+CTPHVValue = 0.45
+TEMPValue = 34.9
+HUMIDValue = 0.252
+WINSEPDValue = 2.1
+LaneWidthValue = 12
+PavedWidthValue = 4
+DateValue = 3
+MixValue = 'FC5 '
+CurbValue = 'NO'
+GuardValue = 'NO'
+RumbleValue = 'NO'
+BikeValue = 'YES'
+
+
+
+
+new_data= pd.Series([SpeedLimitValue,LanesValue,CTPPValue,CTPHVValue,TEMPValue,HUMIDValue,WINSEPDValue,LaneWidthValue,
+                     PavedWidthValue,DateValue,int(MixModel.transform([MixValue])),int(CurbModel.transform([CurbValue])),
+                     int(GuardModel.transform([GuardValue])),int(RumbModel.transform([RumbleValue])),int(BikeModel.transform([BikeValue]))])
+
+
+if int(GridSearchModel.best_estimator_.predict([new_data])) ==0 : 
+    Result = "it doesn't need paint"
+else : 
+    Result = "it needs paint"
+
+print(Result)

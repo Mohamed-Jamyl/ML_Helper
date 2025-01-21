@@ -1,0 +1,2 @@
+import shutil as sh
+sh.move('D:\\1\\1.txt' , 'D:\\1\\33\\55.txt') 

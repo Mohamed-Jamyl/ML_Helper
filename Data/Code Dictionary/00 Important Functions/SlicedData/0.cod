@@ -1,0 +1,6 @@
+def SlicedData(feature_list, dropna = False) : 
+    global data
+    if dropna :
+        return data.loc[:, feature_list ].dropna()
+    else : 
+        return data.loc[:, feature_list ]

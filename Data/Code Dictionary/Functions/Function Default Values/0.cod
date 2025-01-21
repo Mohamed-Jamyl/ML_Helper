@@ -1,0 +1,7 @@
+def powers(m, n = 4 ) : 
+    print (m**(n))
+powers(3,2)
+------------------------------------------
+def powers(m, n = 4 ) : 
+    print (m**(n))
+powers(3)

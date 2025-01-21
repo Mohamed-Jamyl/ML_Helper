@@ -1,0 +1,46 @@
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+sns.set(style="whitegrid")
+
+
+################################################
+fig, ax = plt.subplots(figsize=(20,6))
+plt.subplot(1,2,1)
+plt.title('Rumour')
+sns.kdeplot(data[data['Label']==1]['TweetLength'], shade=True)        
+
+plt.subplot(1,2,2)
+plt.title('Non-Rumour')
+sns.kdeplot(data[data['Label']==0]['TweetLength'], shade=True)        
+
+
+
+################################################
+
+fig, ax = plt.subplots(figsize=(20,12))
+
+plt.subplot(1,2,1)
+plt.title('Rumour')
+sns.countplot(x='Letter @', data=data[data['Label']==1],facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3),
+              order = data[data['Label']==1]['Letter @'].value_counts().index)
+plt.subplot(1,2,2)
+plt.title('Non-Rumour')
+sns.countplot(x='Letter @', data=data[data['Label']==0],facecolor=(0, 0, 0, 0),linewidth=5,edgecolor=sns.color_palette("dark", 3),
+              order = data[data['Label']==0]['Letter @'].value_counts().index)
+
+
+################################################
+
+
+fig, ax = plt.subplots(figsize=(20,12))
+
+plt.subplot(1,2,1)
+plt.title('Rumour')
+plt.pie(data[data['Label']==1]['Has Favourit'].value_counts(),labels=list(data[data['Label']==1]['Has Favourit'].value_counts().index),
+    autopct ='%1.2f%%' , labeldistance = 1.1,explode = [0.05 for i in range(len(data[data['Label']==1]['Has Favourit'].value_counts()))] )
+
+plt.subplot(1,2,2)
+plt.title('Non-Rumour')
+plt.pie(data[data['Label']==0]['Has Favourit'].value_counts(),labels=list(data[data['Label']==0]['Has Favourit'].value_counts().index),
+    autopct ='%1.2f%%' , labeldistance = 1.1,explode = [0.05 for i in range(len(data[data['Label']==0]['Has Favourit'].value_counts()))] )

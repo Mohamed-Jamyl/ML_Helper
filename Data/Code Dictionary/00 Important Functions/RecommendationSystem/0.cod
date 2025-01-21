@@ -1,0 +1,470 @@
+
+
+import pandas as pd
+from itertools import islice
+
+
+# In[2]:
+
+
+Profiles= pd.read_csv('Profiles.csv')
+Groups= pd.read_csv('Groups.csv')
+Pages= pd.read_csv('Pages.csv')
+
+
+# In[3]:
+
+
+Profiles.shape,Groups.shape,Pages.shape
+
+
+# In[4]:
+
+
+Groups.head()
+
+
+# In[5]:
+
+
+Groups.columns
+
+
+# In[11]:
+
+
+def AI_RS_ExistUserSelect(Profile) : 
+    N = 30
+    Threshold = 0.2
+    ListStart = 10
+    GroupsDict,PagesDict,ProfilesDict,GroupsDict_,PagesDict_,ProfilesDict_  = {},{},{},{},{},{}
+    TGroupsDict,TPagesDict,TProfilesDict,TGroupsDict_,TPagesDict_,TProfilesDict_  = {},{},{},{},{},{}
+    FGroupsDict,FGroupsDict_,FPagesDict,FPagesDict_,FProfilesDict,FProfilesDict_ = {},{},{},{},{},{}
+    for i in range(Groups.shape[0]) : 
+        Diff = [(a-b)**2 for a,b in zip(Groups.iloc[i].tolist()[ListStart:],Profile.tolist()[ListStart:])]
+        GroupsDict[Groups['ID'][i]] = sum(Diff)
+        T = [abs(a-b)<Threshold for a,b in zip(Groups.iloc[i].tolist()[ListStart:],Profile.tolist()[ListStart:])]
+        TGroupsDict[Groups['ID'][i]] = T.count(True)
+
+    for i in range(Pages.shape[0]) : 
+        Diff = [(a-b)**2 for a,b in zip(Pages.iloc[i].tolist()[ListStart:],Profile.tolist()[ListStart:])]
+        PagesDict[Pages['ID'][i]] = sum(Diff)
+        T = [abs(a-b)<Threshold for a,b in zip(Pages.iloc[i].tolist()[ListStart:],Profile.tolist()[ListStart:])]
+        TPagesDict[Pages['ID'][i]] = T.count(True)
+        
+    for i in range(Profiles.shape[0]) : 
+        Diff = [(a-b)**2 for a,b in zip(Profiles.iloc[i].tolist()[ListStart:],Profile.tolist()[ListStart:])]
+        ProfilesDict[Profiles['ID'][i]] = sum(Diff)
+        
+        T = [abs(a-b)<Threshold for a,b in zip(Profiles.iloc[i].tolist()[ListStart:],Profile.tolist()[ListStart:])]
+        TProfilesDict[Profiles['ID'][i]] = T.count(True)
+    del ProfilesDict[Profile['ID']]
+    del TProfilesDict[Profile['ID']]
+    
+    GroupsDict= islice({k: v for k, v in sorted(GroupsDict.items(), key=lambda item: item[1])}.items(),N)
+    for k,m in GroupsDict : 
+        GroupsDict_[k] = m
+    PagesDict= islice({k: v for k, v in sorted(PagesDict.items(), key=lambda item: item[1])}.items(),N)
+    for k,m in PagesDict : 
+        PagesDict_[k] = m
+
+    ProfilesDict= islice({k: v for k, v in sorted(ProfilesDict.items(), key=lambda item: item[1])}.items(),N)
+    for k,m in ProfilesDict : 
+        ProfilesDict_[k] = m
+
+    TGroupsDict= islice({k: v for k, v in sorted(TGroupsDict.items(), key=lambda item: item[1],reverse = True)}.items(),N)
+    for k,m in TGroupsDict : 
+        TGroupsDict_[k] = m
+    TPagesDict= islice({k: v for k, v in sorted(TPagesDict.items(), key=lambda item: item[1],reverse = True)}.items(),N)
+    for k,m in TPagesDict : 
+        TPagesDict_[k] = m
+    TProfilesDict= islice({k: v for k, v in sorted(TProfilesDict.items(), key=lambda item: item[1],reverse = True)}.items(),N)
+    for k,m in TProfilesDict : 
+        TProfilesDict_[k] = m
+
+    GroupsDict_ = {k:i for k,i in zip(GroupsDict_.keys(),range(1,len(GroupsDict_.keys())+1))}
+    TGroupsDict_ = {k:i for k,i in zip(TGroupsDict_.keys(),range(1,len(TGroupsDict_.keys())+1))}
+    NN = 0
+    for a in TGroupsDict_.keys() : 
+        for b in GroupsDict_.keys() :  
+            if a==b : 
+                NN+=1
+                FGroupsDict[a] = NN
+    for a in FGroupsDict.keys() : 
+        del GroupsDict_[a]
+        del TGroupsDict_[a]
+
+    Nlist = []
+    for i in range(N) : 
+        try : 
+            Nlist.append(list(TGroupsDict_.keys())[i]) 
+        except : 
+            pass
+        try : 
+            Nlist.append(list(GroupsDict_.keys())[i]) 
+        except : 
+            pass
+    for a in Nlist : 
+        NN+=1
+        FGroupsDict[a] = NN
+    FGroupsDict= islice({k: v for k, v in sorted(FGroupsDict.items(), key=lambda item: item[1])}.items(),N)
+    for k,m in FGroupsDict : 
+        FGroupsDict_[k] = m
+
+
+    PagesDict_ = {k:i for k,i in zip(PagesDict_.keys(),range(1,len(PagesDict_.keys())+1))}
+    TPagesDict_ = {k:i for k,i in zip(TPagesDict_.keys(),range(1,len(TPagesDict_.keys())+1))}
+    NN = 0
+    for a in TPagesDict_.keys() : 
+        for b in PagesDict_.keys() :  
+            if a==b : 
+                NN+=1
+                FPagesDict[a] = NN
+    for a in FPagesDict.keys() : 
+        del PagesDict_[a]
+        del TPagesDict_[a]
+
+    Nlist = []
+    for i in range(N) : 
+        try : 
+            Nlist.append(list(TPagesDict_.keys())[i]) 
+        except : 
+            pass
+        try : 
+            Nlist.append(list(PagesDict_.keys())[i]) 
+        except : 
+            pass
+    for a in Nlist : 
+        NN+=1
+        FPagesDict[a] = NN
+    FPagesDict= islice({k: v for k, v in sorted(FPagesDict.items(), key=lambda item: item[1])}.items(),N)
+    for k,m in FPagesDict : 
+        FPagesDict_[k] = m
+
+    
+    
+ 
+
+    ProfilesDict_ = {k:i for k,i in zip(ProfilesDict_.keys(),range(1,len(ProfilesDict_.keys())+1))}
+    TProfilesDict_ = {k:i for k,i in zip(TProfilesDict_.keys(),range(1,len(TProfilesDict_.keys())+1))}
+    
+    NN = 0
+    for a in TProfilesDict_.keys() : 
+        for b in ProfilesDict_.keys() :  
+            if a==b : 
+                NN+=1
+                FProfilesDict[a] = NN
+    for a in FProfilesDict.keys() : 
+        del ProfilesDict_[a]
+        del TProfilesDict_[a]
+
+    Nlist = []
+    for i in range(N) : 
+        try : 
+            Nlist.append(list(TProfilesDict_.keys())[i]) 
+        except : 
+            pass
+        try : 
+            Nlist.append(list(ProfilesDict_.keys())[i]) 
+        except : 
+            pass
+    for a in Nlist : 
+        NN+=1
+        FProfilesDict[a] = NN
+    FProfilesDict= islice({k: v for k, v in sorted(FProfilesDict.items(), key=lambda item: item[1])}.items(),N)
+    for k,m in FProfilesDict : 
+        FProfilesDict_[k] = m    
+
+        
+        
+    return FGroupsDict_,FPagesDict_,FProfilesDict_
+
+
+# In[12]:
+
+
+BestGroups,BestPages,BestFriends = AI_RS_ExistUserSelect(Profiles.iloc[150])
+
+
+# In[ ]:
+
+
+
+
+
+# In[13]:
+
+
+BestGroups
+
+
+# In[14]:
+
+
+BestPages
+
+
+# In[15]:
+
+
+BestFriends
+
+
+# In[11]:
+
+
+for i,j,k,l in zip(Profiles.iloc[150].tolist(),Profiles.iloc[645].tolist(),Pages.iloc[204].tolist(),Groups.iloc[423].tolist()) : 
+    print(i ,'    ' , j,'    ',k,'     ',l)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[18]:
+
+
+def AI_RS_NewUserSelect(Profile) : 
+    N = 20
+    Threshold = 0.2
+    ListStart = 10
+    Factors = [1,1,1,1,1,1,1,1]
+    GroupsDict,PagesDict,ProfilesDict= {},{},{}
+    def GetStrength(Object,ObjectDict) : 
+        ObjectDict_ = {}
+        for i in range(Object.shape[0]) : 
+            T1 = 1 - (abs(float(Profile[2])- float(Object.iloc[i][2]))/100)
+            T2 = int(Profile[3] == Object.iloc[i][3])
+            T3 = int(Profile[4] == Object.iloc[i][4])
+            T4 = int(Profile[5] == Object.iloc[i][5])
+            w1,w2 = Profile[6].split(',')
+            w1,w2 = float(w1),float(w2)
+            v1,v2 =  Object.iloc[i][6].split(',')
+            v1,v2 = float(v1),float(v2)
+            T5 = (22 - (abs(w1-v1) + abs(w2-v2)))*0.1
+            T6 = int(Profile[7] == Object.iloc[i][7])
+            T7 = int(Profile[8] == Object.iloc[i][8])    
+            S1 = Profile[9].split(',')
+            S2 = Object.iloc[i][9].split(',')
+            T8 = 0
+            for s1 in S1 : 
+                for s2 in S2 : 
+                    T8 += int(s1==s2)
+            Ts = [T1,T2,T3,T4,T5,T6,T7,T8]
+            Strength = sum([k*j for k,j in zip (Ts,Factors)])
+            ObjectDict[Object['ID'][i]] = Strength
+        if ObjectDict ==  ProfilesDict : 
+            del ObjectDict[Profile['ID']]
+        ObjectDict= islice({k: v for k, v in sorted(ObjectDict.items(), key=lambda item: item[1],reverse = True)}.items(),N)
+        for k,m in ObjectDict : 
+                ObjectDict_[k] = m
+        ObjectDict = {k:i for k,i in zip(ObjectDict_.keys(),range(1,len(ObjectDict_.keys())+1))}
+        return ObjectDict
+    return GetStrength(Groups,GroupsDict),GetStrength(Pages,PagesDict),GetStrength(Profiles,ProfilesDict) 
+       
+
+
+# In[19]:
+
+
+BestGroups,BestPages,BestFriends  = AI_RS_NewUserSelect(Profiles.iloc[150])           
+
+
+# In[20]:
+
+
+BestGroups
+
+
+# In[21]:
+
+
+BestPages
+
+
+# In[22]:
+
+
+BestFriends
+
+
+# In[23]:
+
+
+g = 0
+for i,j,k,l in zip(Profiles.iloc[150].tolist(),Profiles.iloc[234].tolist(),Pages.iloc[552].tolist(),Groups.iloc[462].tolist()) : 
+    g+=1
+    if g<11 : print(i ,'    ' , j,'    ',k,'     ',l)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[18]:
+
+
+def AI_RS_Interact(ProfileID,ObjectList,Type) : 
+    Threshold = 0.2
+    ListStart = 10
+    OriginalList = Profiles.loc[ProfileID].tolist()
+    for i in range(ListStart,len(OriginalList)) : 
+        OriginalList[i]  = float(OriginalList[i])+ ( Type * Threshold * float(ObjectList[i]))
+        if float(OriginalList[i]) < 0 :OriginalList[i] = 0
+        if float(OriginalList[i]) > 1.0 : OriginalList[i] = 1
+    Profiles.loc[ProfileID] = OriginalList
+    return None
+
+
+# In[19]:
+
+
+for i in Profiles.iloc[20].tolist() : 
+    print(i,end=' , ')
+
+
+# In[ ]:
+
+
+
+
+
+# In[20]:
+
+
+AI_RS_Interact(20,Profiles.iloc[582].tolist(),-1)
+for i in Profiles.iloc[20].tolist() : 
+    print(i,end=' , ')
+
+
+# In[ ]:
+
+
+
+
+
+# In[21]:
+
+
+AI_RS_Interact(20,Profiles.iloc[582].tolist(),1)
+for i in Profiles.iloc[20].tolist() : 
+    print(i,end=' , ')
+
+
+# In[ ]:
+
+
+
+
+
+# In[22]:
+
+
+AI_RS_Interact(20,Profiles.iloc[582].tolist(),0)
+for i in Profiles.iloc[20].tolist() : 
+    print(i,end=' , ')
+
+
+# In[ ]:
+
+
+
+
+
+# In[23]:
+
+
+AI_RS_Interact(20,Profiles.iloc[582].tolist(),0.1)
+for i in Profiles.iloc[20].tolist() : 
+    print(i,end=' , ')
+
+
+# In[ ]:
+
+
+
+
+
+# In[24]:
+
+
+AI_RS_Interact(20,Profiles.iloc[582].tolist(),-0.05)
+for i in Profiles.iloc[20].tolist() : 
+    print(i,end=' , ')
+
+
+# In[ ]:
+
+
+
+

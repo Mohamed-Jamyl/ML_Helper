@@ -1,0 +1,27 @@
+%%time
+
+for i in range(5000000) :
+    i+=1
+print(i)    
+
+
+5000000
+Wall time: 1.76 s
+
+-------------------------------------------------
+
+%%time
+import pandas as pd 
+
+df = pd.DataFrame({"col0":{"a":0,"b":0}
+              ,"col1":{"a":1,"b":1}
+              ,"col2":{"a":2,"b":2}
+             })
+print(df)
+
+
+col0  col1  col2
+a     0     1     2
+b     0     1     2
+
+Wall time: 77.4 ms

@@ -1,0 +1,14 @@
+data['Predicted Value'] = Model.predict(X)
+
+
+ValuesDict = {0:'Approved',1:'Not Approved'}
+WrongIndices = []
+WrongCounter = 0
+Index = -1
+for Actual,Predicted in zip(data['Label'].tolist(),data['Predicted Value'].tolist()) : 
+    Index+=1
+    if Actual != Predicted : 
+        WrongCounter+=1
+        WrongIndices.append(Index)
+        print(f'Wrong Prediction at Index {Index} predicted as {ValuesDict[Predicted]} while it should be {ValuesDict[Actual]}')
+print(f'\n\n Total Wrong Predictions is {WrongCounter} out of total {data.shape[0]} with percentage {np.round(100*(data.shape[0]-WrongCounter)/data.shape[0],2)}%')        

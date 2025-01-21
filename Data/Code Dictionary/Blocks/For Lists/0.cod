@@ -1,0 +1,43 @@
+students  = ["ahmed","ramy","heba"]
+
+for a in students : 
+	print(a)
+------------------------------------------
+grades  = {"ahmed":35 ,"mona":40 ,"mena":37 }
+
+for a in grades : 
+	print(a)
+------------------------------------------
+grades  = {"ahmed":35 ,"mona":40 ,"mena":37 }
+
+for a in grades.items() : 
+	print(a)
+------------------------------------------
+grades  = {"ahmed":35 ,"mona":40 ,"mena":37 }
+
+for a,b in grades.items() : 
+	print(a)
+print(b)
+------------------------------------------
+grades  = {"ahmed":35 ,"mona":40 ,"mena":37 }
+
+for a in grades.keys() : 
+	print(a)
+------------------------------------------
+grades  = {"ahmed":35 ,"mona":40 ,"mena":37 }
+
+for a in grades.values() : 
+	print(a)
+------------------------------------------
+students =  ["ahmed","ramy","ramy","mena"]
+
+for i,a in enumerate(students) : 
+	print(i)
+print(a)
+------------------------------------------
+students =  ["ahmed","ramy","ramy","mena"]
+grades = [25,33,66,95]
+for i,a in zip(students,grades) : 
+	print("student" + i + " got " + str(a) + "degree"  )
+------------------------------------------
+features = [c for c in train_df.columns if c not in ['IDcode','target']]

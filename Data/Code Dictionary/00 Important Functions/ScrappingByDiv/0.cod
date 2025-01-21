@@ -1,0 +1,38 @@
+import requests
+url = r'https://www.webteb.com/drug/ايبوبروفين' 
+website = requests.get(url)
+soup = BeautifulSoup(website.content)
+soup
+Affect = [''.join(s.find_all(text=True)) for s in soup.findAll("div", {"id": 'affectiontime'})]
+Affect
+
+
+###########################################
+
+
+import requests
+from bs4 import BeautifulSoup
+
+
+
+
+def Get(Name) : 
+    url = r'https://www.webteb.com/drug/' + Name
+    website = requests.get(url)
+    soup = BeautifulSoup(website.content)
+    text = [''.join(s.findAll(text=True))for s in soup.findAll('p')]
+    for item in text:
+        print(item)    
+
+Get('الاسبرين')
+
+
+###########################################
+
+def GetPage(Word) : 
+    page = requests.get(r'https://ar.wikipedia.org/wiki/'+Word)
+    Text = page.text
+    Text = re.sub(r'[0-9A-Za-zä%“”úáíóííóíé<>!+=+"\n:,.\]\[\\\/\t()$%^&{}?;@#|_-]', '', Text)
+    return Text
+
+GetPage('الصومال')

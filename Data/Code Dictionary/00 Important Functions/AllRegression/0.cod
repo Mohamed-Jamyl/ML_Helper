@@ -1,0 +1,39 @@
+from sklearn.linear_model import LinearRegression,SGDRegressor,Lasso,Ridge
+from sklearn.ensemble import RandomForestRegressor,GradientBoostingRegressor
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import mean_absolute_error,mean_squared_error,median_absolute_error 
+
+LinearRegressionModel = LinearRegression(fit_intercept=True, normalize=True,copy_X=True,n_jobs=-1)
+SGDRegressionModel = SGDRegressor(alpha=0.1,random_state=33,penalty='l2',loss = 'huber')
+LassoRegressionModel = Lasso(alpha=1.0,random_state=33,normalize=False)
+RidgeRegressionModel = Ridge(alpha=1.0,random_state=33)
+RandomForestRegressorModel = RandomForestRegressor(n_estimators=1000,max_depth=8, random_state=33)
+GBRModel = GradientBoostingRegressor(n_estimators=500,max_depth=7,learning_rate = 1.5 ,random_state=33)
+SVRModel = SVR(C = 1.0 ,epsilon=0.1,kernel = 'rbf') 
+DecisionTreeRegressorModel = DecisionTreeRegressor( max_depth=3,random_state=33)
+KNeighborsRegressorModel = KNeighborsRegressor(n_neighbors = 5, weights='uniform',algorithm = 'auto')    
+
+
+Models = [LinearRegressionModel,SGDRegressionModel,LassoRegressionModel,RidgeRegressionModel,RandomForestRegressorModel,
+          GBRModel,SVRModel,DecisionTreeRegressorModel,KNeighborsRegressorModel]
+
+
+
+
+
+for Model in Models : 
+    print(f'for Model {str(Model).split("(")[0]}')
+    Model.fit(X_train, y_train)
+    print(f'Train Score is : {Model.score(X_train, y_train)}')
+    print(f'Test Score is : {Model.score(X_test, y_test)}')
+    y_pred = Model.predict(X_test)
+    print(f'MAE value is  : {mean_absolute_error(y_test, y_pred)}')
+    print(f'MSE value is  : {mean_squared_error(y_test, y_pred)}')
+    print(f'MdSE value is  : {median_absolute_error(y_test, y_pred)}')
+    print('=================================================')
+    
+
+
+

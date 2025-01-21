@@ -1,0 +1,10 @@
+def CountWords(text) :  
+    all_words = []
+    for i in range(text.shape[0]) : 
+        this_phrase = list(text)[i]
+        for word in this_phrase.split() : 
+            all_words.append(word)
+
+    print(f'Total words are {len(all_words)} words')   
+    print('')
+    print(f'Total unique words are {len(set(all_words))} words')   

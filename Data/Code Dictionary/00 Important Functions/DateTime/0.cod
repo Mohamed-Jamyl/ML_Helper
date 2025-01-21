@@ -1,0 +1,10 @@
+data['ThisDate']  =  pd.to_datetime(data['Date'], format="%m/%d/%Y")
+
+data['Day']  = data['ThisDate'].dt.day
+data['Month']  = data['ThisDate'].dt.month
+data['Year']  = data['ThisDate'].dt.year
+data['Hour']  = data['ThisDate'].dt.hour
+data['Minute']  = data['ThisDate'].dt.minute
+data['WeekDay'] = data['ThisDate'].dt.day_name()
+
+

@@ -1,0 +1,3 @@
+def TopCounts(feature , number = 10) : 
+    global data
+    return data[feature].value_counts()[:number]           

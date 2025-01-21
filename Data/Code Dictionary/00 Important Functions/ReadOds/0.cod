@@ -1,0 +1,3 @@
+from pandas_ods_reader import read_ods
+Sheet1 = read_ods('p1.ods'  ,  1  ,  headers= False  ,   columns=["Date", "Share Price"] )
+Sheet1

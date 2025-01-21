@@ -1,0 +1,5 @@
+import nltk
+def ShowNGram(Words ,Value,ShowLimit) : 
+    X = (pd.Series(nltk.ngrams(Words, Value)).value_counts())[:ShowLimit]
+    print('NGrams sample are : \n' , X)
+    X.sort_values().plot.barh(color='blue', width=.9, figsize=(12, 8))

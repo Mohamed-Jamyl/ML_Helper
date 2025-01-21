@@ -1,0 +1,31 @@
+!pip install PyPDF2
+from PyPDF2 import PdfFileWriter, PdfFileReader
+import os
+
+
+output = PdfFileWriter()
+inputpdf = PdfFileReader(open('F 03.pdf', "rb"))
+for j in range(207,580):
+    output.addPage(inputpdf.getPage(j))
+
+with open('B 06.pdf', "wb") as outputStream:
+    output.write(outputStream)      
+
+
+
+
+
+
+output = PdfFileWriter()
+inputpdf1 = PdfFileReader(open('F 01.pdf', "rb"))
+inputpdf2 = PdfFileReader(open('F 02.pdf', "rb"))
+inputpdf3 = PdfFileReader(open('F 03.pdf', "rb"))
+for j in range(1398,1497):
+    output.addPage(inputpdf1.getPage(j))
+for j in range(64):
+    output.addPage(inputpdf2.getPage(j))
+for j in range(208):
+    output.addPage(inputpdf3.getPage(j))
+
+with open('B 05.pdf', "wb") as outputStream:
+    output.write(outputStream)      
